@@ -37,6 +37,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# real student roster data (PII) - never commit to git/GitHub; keep local only
+/data/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
