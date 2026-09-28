@@ -1,0 +1,60 @@
+// Student Sports Skill Tracker - Database Schema (PostgreSQL)
+// ---------------------------------------------------------------------------
+// แทนที่ Google Sheets เดิม 3 แท็บ (Student_DB, Skill_Logs, Audit_Log)
+// System_Config (กีฬา/ทักษะ/คำอธิบาย Level) ยังเก็บเป็น static config ใน
+// lib/sportsConfig.js เหมือนเดิม ไม่ทำเป็นตาราง เพราะแทบไม่เปลี่ยนบ่อย
+// และไม่ต้องพึ่ง DB round-trip ทุกครั้งที่โหลดหน้าแรก
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_URL")
+}
+
+model Student {
+  id                  String     @id // เช่น STU001
+  name                String
+  className           String     @map("class_name")
+  currentAcademicYear Int        @map("current_academic_year")
+  status              String     @default("Active") // Active | Inactive | Graduated
+  createdAt           DateTime   @default(now()) @map("created_at")
+  updatedAt           DateTime   @updatedAt @map("updated_at")
+  logs                SkillLog[]
+
+  @@index([className])
+  @@index([status])
+  @@map("students")
+}
+
+model SkillLog {
+  id            Int      @id @default(autoincrement())
+  timestamp     DateTime @default(now())
+  academicYear  Int      @map("academic_year")
+  studentId     String   @map("student_id")
+  student       Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentName   String   @map("student_name")
+  selectedSport String   @map("selected_sport")
+  skillName     String   @map("skill_name")
+  finalLevel    Int      @map("final_level")
+  coachNotes    String?  @map("coach_notes")
+
+  @@index([studentId])
+  @@index([academicYear, selectedSport])
+  @@map("skill_logs")
+}
+
+model AuditLog {
+  id           Int      @id @default(autoincrement())
+  timestamp    DateTime @default(now())
+  action       String
+  actor        String
+  academicYear Int?     @map("academic_year")
+  sport        String?
+  studentCount Int?     @map("student_count")
+  details      String?
+
+  @@map("audit_log")
+}
