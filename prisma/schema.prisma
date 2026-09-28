@@ -19,6 +19,7 @@ model Student {
   name                String
   className           String     @map("class_name")
   currentAcademicYear Int        @map("current_academic_year")
+  assignedSport       String?    @map("assigned_sport") // กีฬาที่กำหนดให้เล่นในปีการศึกษาปัจจุบัน ตั้งค่าตอน "ตั้งค่าปีการศึกษาใหม่" (หน้า Admin) ใช้เป็นค่า default ตอนกรอกคะแนนเท่านั้น ไม่ผูกพันตายตัว
   status              String     @default("Active") // Active | Inactive | Graduated
   createdAt           DateTime   @default(now()) @map("created_at")
   updatedAt           DateTime   @updatedAt @map("updated_at")

@@ -7,6 +7,7 @@ const LINKS = [
   { href: '/', label: '📝 กรอกคะแนน' },
   { href: '/report', label: '📊 รายงานรายห้อง' },
   { href: '/admin', label: '📈 ภาพรวมระบบ' },
+  { href: '/admin/students', label: '👤 จัดการนักเรียน' },
 ];
 
 export default function Header() {
