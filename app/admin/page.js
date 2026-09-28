@@ -46,10 +46,11 @@ export default function AdminOverviewPage() {
 
   return (
     <div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5">
         <KpiCard icon="👥" value={data.totalActiveStudents} label="นักเรียน Active" />
         <KpiCard icon="🏅" value={data.bySportLatest.length} label="ชนิดกีฬาที่กำลังเล่นอยู่" />
         <KpiCard icon="📝" value={data.totalEvaluationRounds} label="รอบการประเมินสะสม" />
+        <KpiCard icon="🏆" value={data.sportAnalytics?.totalMaxAchievers ?? 0} label="นักเรียนที่ถึง Level สูงสุดแล้ว (สะสม)" />
         <KpiCard icon="🕒" value={timeAgoTh(data.lastActivityTs)} label="กิจกรรมล่าสุด" />
       </div>
 
@@ -86,6 +87,48 @@ export default function AdminOverviewPage() {
             ))
           )}
         </div>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 mb-5">
+        <h2 className="font-semibold text-slate-700 mb-1">Executive Dashboard: Retention Rate &amp; Time-to-Level-Up ต่อกีฬา</h2>
+        <p className="text-xs text-slate-400 mb-3">
+          Retention Rate = % ของนักเรียนที่เรียนกีฬานั้นจน &ldquo;ถึง Level สูงสุด&rdquo; เทียบกับที่ย้ายไปกีฬาอื่นกลางคัน (ไม่นับคนที่ยังเรียนอยู่และยังสรุปผลไม่ได้)
+          · Avg รอบ/เลเวล = จำนวน &ldquo;รอบการประเมิน&rdquo; เฉลี่ยที่ใช้ต่อการเลื่อนขึ้น 1 Level (ประเมินจากรอบที่บันทึกจริง ไม่ใช่จำนวนคาบเรียน)
+        </p>
+        {(!data.sportAnalytics || data.sportAnalytics.bySport.length === 0) ? (
+          <p className="text-sm text-slate-400 py-4 text-center">ยังไม่มีข้อมูลเพียงพอสำหรับวิเคราะห์</p>
+        ) : (
+          <div className="overflow-auto">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="text-left text-xs font-semibold text-slate-400 border-b border-slate-200">
+                  <th className="py-2 pr-3">กีฬา</th>
+                  <th className="py-2 pr-3 text-center">Retention Rate</th>
+                  <th className="py-2 pr-3 text-center">ถึง Level สูงสุด</th>
+                  <th className="py-2 pr-3 text-center">ย้ายกลางคัน</th>
+                  <th className="py-2 pr-3 text-center">กำลังเรียนอยู่</th>
+                  <th className="py-2 text-center">Avg รอบ/เลเวล (TLU)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.sportAnalytics.bySport.map((s) => (
+                  <tr key={s.sport} className="border-b border-slate-100 last:border-0">
+                    <td className="py-2 pr-3 text-slate-700">{s.sport}</td>
+                    <td className="py-2 pr-3 text-center font-semibold">
+                      {s.retentionRate === null ? <span className="text-slate-300 font-normal">—</span> : s.retentionRate + '%'}
+                    </td>
+                    <td className="py-2 pr-3 text-center text-emerald-600 font-semibold">{s.graduated}</td>
+                    <td className="py-2 pr-3 text-center text-amber-600">{s.switchedAway}</td>
+                    <td className="py-2 pr-3 text-center text-slate-400">{s.stillActive}</td>
+                    <td className="py-2 text-center">
+                      {s.avgRoundsPerLevel === null ? <span className="text-slate-300">—</span> : s.avgRoundsPerLevel + ' รอบ/เลเวล'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
