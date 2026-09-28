@@ -137,14 +137,14 @@ export default function CoachInputPage() {
                   type="button"
                   onClick={() => setSport(s.name)}
                   className={
-                    'flex-shrink-0 w-24 sm:w-28 rounded-xl border-2 overflow-hidden text-center transition ' +
+                    'flex-shrink-0 w-32 sm:w-36 rounded-xl border-2 overflow-hidden text-center transition ' +
                     (selected ? 'border-[#C81E3A] ring-2 ring-[#C81E3A]/30' : 'border-slate-200 hover:border-slate-300')
                   }
                 >
-                  <div className="w-full h-16 sm:h-20 bg-slate-100 overflow-hidden">
+                  <div className="w-full h-40 sm:h-48 bg-slate-100 overflow-hidden">
                     {SPORT_IMAGES[s.name] && (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={SPORT_IMAGES[s.name]} alt={s.name} className="w-full h-full object-cover" />
+                      <img src={SPORT_IMAGES[s.name]} alt={s.name} className="w-full h-full object-contain" />
                     )}
                   </div>
                   <div
