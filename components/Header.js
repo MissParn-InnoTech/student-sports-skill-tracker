@@ -12,7 +12,7 @@ const LINKS = [
 export default function Header() {
   const pathname = usePathname();
   return (
-    <header className="no-print bg-gradient-to-r from-teal-700 to-teal-500 text-white px-4 sm:px-6 pt-4 pb-3 shadow">
+    <header className="no-print bg-gradient-to-r from-[#181818] to-[#C81E3A] text-white px-4 sm:px-6 pt-4 pb-3 shadow">
       <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-lg sm:text-xl font-bold tracking-tight">Student Sports Skill Tracker</h1>

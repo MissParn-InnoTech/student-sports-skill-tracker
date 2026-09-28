@@ -66,7 +66,7 @@ export default function AdminOverviewPage() {
                 <div key={s.sport} className="flex items-center gap-3 text-sm py-1.5">
                   <div className="w-40 truncate text-slate-600">{s.sport}</div>
                   <div className="flex-1 bg-slate-100 rounded-full h-3 overflow-hidden">
-                    <div className="h-full bg-teal-500 rounded-full" style={{ width: Math.max(pct, 4) + '%' }} />
+                    <div className="h-full bg-[#C81E3A] rounded-full" style={{ width: Math.max(pct, 4) + '%' }} />
                   </div>
                   <div className="w-10 text-right font-semibold text-slate-700">{s.count}</div>
                 </div>

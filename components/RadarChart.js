@@ -14,7 +14,7 @@ import {
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend);
 
 /** RadarChart: ระดับทักษะของ 1 รอบการประเมิน (skills: string[], levels: {skill:level}) */
-export default function RadarChart({ skills, levels, label, color = '#0d9488' }) {
+export default function RadarChart({ skills, levels, label, color = '#C81E3A' }) {
   const data = {
     labels: skills,
     datasets: [

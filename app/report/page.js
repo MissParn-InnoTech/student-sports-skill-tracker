@@ -139,7 +139,7 @@ export default function ClassReportPage() {
           <button
             onClick={loadReport}
             disabled={busy}
-            className="col-span-2 md:col-span-1 bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white font-semibold rounded-lg px-4 py-2 text-sm transition"
+            className="col-span-2 md:col-span-1 bg-[#C81E3A] hover:bg-[#a8172f] disabled:opacity-50 text-white font-semibold rounded-lg px-4 py-2 text-sm transition"
           >
             📊 ดูรายงาน
           </button>

@@ -77,12 +77,12 @@ export default function DashboardPage({ params }) {
 
     printEl.innerHTML = `
       <div style="font-family:sans-serif;color:#1f2937">
-        <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #0d9488;padding-bottom:10px;margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #C81E3A;padding-bottom:10px;margin-bottom:14px">
           <div>
             <div style="font-weight:bold;font-size:16px">${SCHOOL_INFO.nameTh}</div>
             <div style="font-size:12px;color:#64748b">${SCHOOL_INFO.nameEn}</div>
           </div>
-          <div style="width:56px;height:56px;border-radius:50%;background:#0d9488;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold">${SCHOOL_INFO.logoText}</div>
+          <div style="width:56px;height:56px;border-radius:50%;background:#C81E3A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold">${SCHOOL_INFO.logoText}</div>
         </div>
         <h2 style="text-align:center;font-size:18px;margin:0 0 12px">รายงานผลการประเมินทักษะกีฬา (Report Card)</h2>
         <div style="font-size:13px;margin-bottom:10px">
@@ -112,7 +112,7 @@ export default function DashboardPage({ params }) {
 
   return (
     <div>
-      <Link href="/" className="text-sm text-teal-700 hover:underline">
+      <Link href="/" className="text-sm text-[#C81E3A] hover:underline">
         ← กลับหน้ากรอกคะแนน
       </Link>
 
@@ -126,7 +126,7 @@ export default function DashboardPage({ params }) {
         {latest && (
           <button
             onClick={printReportCard}
-            className="bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg px-4 py-2 text-sm transition"
+            className="bg-[#C81E3A] hover:bg-[#a8172f] text-white font-semibold rounded-lg px-4 py-2 text-sm transition"
           >
             🖨️ พิมพ์ Report Card (PDF)
           </button>

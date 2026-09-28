@@ -164,7 +164,7 @@ export default function CoachInputPage() {
           <button
             onClick={loadRoster}
             disabled={busy}
-            className="col-span-2 md:col-span-1 bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white font-semibold rounded-lg px-4 py-2 text-sm transition"
+            className="col-span-2 md:col-span-1 bg-[#C81E3A] hover:bg-[#a8172f] disabled:opacity-50 text-white font-semibold rounded-lg px-4 py-2 text-sm transition"
           >
             🔍 ค้นหารายชื่อ
           </button>
@@ -196,8 +196,8 @@ export default function CoachInputPage() {
                   {roster.map((r) => (
                     <tr key={r.studentId} className="border-b border-slate-100 last:border-0">
                       <td className="p-2 align-top whitespace-nowrap">
-                        <Link href={`/dashboard/${r.studentId}`} className="font-semibold text-teal-700 hover:underline">
-                          <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-teal-100 text-teal-700 text-xs font-bold mr-1.5 align-middle">
+                        <Link href={`/dashboard/${r.studentId}`} className="font-semibold text-[#C81E3A] hover:underline">
+                          <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-red-100 text-[#C81E3A] text-xs font-bold mr-1.5 align-middle">
                             {initials(r.studentName)}
                           </span>
                           {r.studentName}
