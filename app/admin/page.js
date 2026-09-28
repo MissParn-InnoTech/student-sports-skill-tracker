@@ -131,6 +131,82 @@ export default function AdminOverviewPage() {
         )}
       </div>
 
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 mb-5">
+        <h2 className="font-semibold text-slate-700 mb-1">ดัชนีความนิยมกีฬารายปี (Year-Over-Year Sport Popularity)</h2>
+        <p className="text-xs text-slate-400 mb-3">
+          นับจำนวนนักเรียนไม่ซ้ำคนที่เรียนกีฬานั้นในแต่ละปีการศึกษา เรียงจากกีฬาที่มีคนเรียนมากที่สุดในปีล่าสุด
+        </p>
+        {(!data.yearlyPopularity || data.yearlyPopularity.rows.length === 0) ? (
+          <p className="text-sm text-slate-400 py-4 text-center">ยังไม่มีข้อมูลเพียงพอสำหรับวิเคราะห์</p>
+        ) : (
+          <div className="overflow-auto">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="text-left text-xs font-semibold text-slate-400 border-b border-slate-200">
+                  <th className="py-2 pr-3">กีฬา</th>
+                  {data.yearlyPopularity.years.map((y) => (
+                    <th key={y} className="py-2 px-3 text-center whitespace-nowrap">
+                      ปี {y}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {data.yearlyPopularity.rows.map((row) => (
+                  <tr key={row.sport} className="border-b border-slate-100 last:border-0">
+                    <td className="py-2 pr-3 text-slate-700 whitespace-nowrap">{row.sport}</td>
+                    {row.series.map((pt) => (
+                      <td key={pt.year} className="py-2 px-3 text-center">
+                        <span className="font-semibold text-slate-700">{pt.count}</span>
+                        {pt.pctChange !== null && pt.pctChange !== 0 && (
+                          <span className={'ml-1 text-xs font-semibold ' + (pt.pctChange > 0 ? 'text-emerald-600' : 'text-red-500')}>
+                            {pt.pctChange > 0 ? '▲' : '▼'}
+                            {Math.abs(pt.pctChange)}%
+                          </span>
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 mb-5">
+        <h2 className="font-semibold text-slate-700 mb-1">อัตราการย้ายสายกีฬา (Sport Switching Rate)</h2>
+        <p className="text-xs text-slate-400 mb-3">
+          นักเรียนที่เลิกเล่นกีฬาหนึ่งแล้วไปเล่นกีฬาถัดไป มักย้ายไปเล่นกีฬาอะไรต่อมากที่สุด — ใช้ออกแบบเส้นทางพัฒนาการข้ามสายกีฬา (Cross-Sport Pathway)
+        </p>
+        {(!data.sportSwitching || data.sportSwitching.length === 0) ? (
+          <p className="text-sm text-slate-400 py-4 text-center">ยังไม่มีข้อมูลการย้ายสายกีฬา</p>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {data.sportSwitching.map((s) => (
+              <div key={s.from} className="rounded-xl border border-slate-200 p-3">
+                <div className="text-sm font-semibold text-slate-700 mb-2">
+                  จาก {s.from} <span className="text-slate-400 font-normal">({s.totalSwitches} คนย้ายออก)</span>
+                </div>
+                <div className="space-y-1.5">
+                  {s.top.map((t) => (
+                    <div key={t.to} className="flex items-center gap-2 text-xs">
+                      <div className="flex-1 truncate text-slate-600">→ {t.to}</div>
+                      <div className="flex-1 bg-slate-100 rounded-full h-2 overflow-hidden max-w-[80px]">
+                        <div className="h-full bg-purple-500 rounded-full" style={{ width: Math.max(t.pct, 6) + '%' }} />
+                      </div>
+                      <div className="w-16 text-right font-semibold text-slate-700">
+                        {t.count} ({t.pct}%)
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
         <h2 className="font-semibold text-slate-700 mb-3">กิจกรรมล่าสุด (Audit Log)</h2>
         {data.recentActivity.length === 0 ? (
