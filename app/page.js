@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { apiGet, apiPost } from '@/lib/apiClient';
 import { LEVEL_NAMES, initials } from '@/lib/levelMeta';
+import { SPORT_IMAGES } from '@/lib/sportImages';
 
 export default function CoachInputPage() {
   const [cfg, setCfg] = useState(null);
@@ -124,7 +125,43 @@ export default function CoachInputPage() {
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 mb-5">
         <h2 className="font-semibold text-slate-700 mb-3">เลือกปีการศึกษา ชั้นเรียน และกีฬา</h2>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 items-end">
+
+        <div className="mb-4">
+          <span className="block text-xs font-semibold text-slate-500 mb-2">ประเภทกีฬา</span>
+          <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1">
+            {cfg.sports.map((s) => {
+              const selected = sport === s.name;
+              return (
+                <button
+                  key={s.name}
+                  type="button"
+                  onClick={() => setSport(s.name)}
+                  className={
+                    'flex-shrink-0 w-24 sm:w-28 rounded-xl border-2 overflow-hidden text-center transition ' +
+                    (selected ? 'border-[#C81E3A] ring-2 ring-[#C81E3A]/30' : 'border-slate-200 hover:border-slate-300')
+                  }
+                >
+                  <div className="w-full h-16 sm:h-20 bg-slate-100 overflow-hidden">
+                    {SPORT_IMAGES[s.name] && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={SPORT_IMAGES[s.name]} alt={s.name} className="w-full h-full object-cover" />
+                    )}
+                  </div>
+                  <div
+                    className={
+                      'text-[11px] sm:text-xs font-semibold px-1 py-1.5 leading-tight ' +
+                      (selected ? 'text-[#C81E3A]' : 'text-slate-600')
+                    }
+                  >
+                    {s.name}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 items-end">
           <Field label="ปีการศึกษา">
             <select className="input" value={year} onChange={(e) => setYear(e.target.value)}>
               {cfg.years.map((y) => (
@@ -144,16 +181,7 @@ export default function CoachInputPage() {
               ))}
             </select>
           </Field>
-          <Field label="ประเภทกีฬา" className="col-span-2 md:col-span-1">
-            <select className="input" value={sport} onChange={(e) => setSport(e.target.value)}>
-              {cfg.sports.map((s) => (
-                <option key={s.name} value={s.name}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <Field label="ผู้บันทึก (ไม่บังคับ)" className="col-span-2 md:col-span-1">
+          <Field label="ผู้บันทึก (ไม่บังคับ)">
             <input
               className="input"
               placeholder="ชื่อ/อีเมลโค้ช"
@@ -164,7 +192,7 @@ export default function CoachInputPage() {
           <button
             onClick={loadRoster}
             disabled={busy}
-            className="col-span-2 md:col-span-1 bg-[#C81E3A] hover:bg-[#a8172f] disabled:opacity-50 text-white font-semibold rounded-lg px-4 py-2 text-sm transition"
+            className="bg-[#C81E3A] hover:bg-[#a8172f] disabled:opacity-50 text-white font-semibold rounded-lg px-4 py-2 text-sm transition"
           >
             🔍 ค้นหารายชื่อ
           </button>
