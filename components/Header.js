@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { ClipboardList, BarChart3, LayoutDashboard, Users, Activity } from 'lucide-react';
+import { ClipboardList, BarChart3, LayoutDashboard, Users } from 'lucide-react';
 
 const LINKS = [
   { href: '/', label: 'กรอกคะแนน', icon: ClipboardList },
@@ -17,8 +18,8 @@ export default function Header() {
     <header className="no-print sticky top-0 z-30 bg-gradient-to-r from-brand-ink to-brand text-white shadow-md">
       <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-3">
         <div className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/20">
-            <Activity className="h-5 w-5" strokeWidth={2.25} />
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white p-1 ring-1 ring-white/20 overflow-hidden">
+            <Image src="/logo-act.png" alt="ACT Sport Center" width={32} height={32} className="h-full w-full object-contain" priority />
           </span>
           <div>
             <h1 className="text-[15px] sm:text-base font-semibold tracking-tight leading-tight">Student Sports Skill Tracker</h1>
