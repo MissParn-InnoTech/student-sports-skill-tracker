@@ -18,8 +18,8 @@ export default function Header() {
     <header className="no-print sticky top-0 z-30 bg-gradient-to-r from-brand-ink to-brand text-white shadow-md">
       <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-3">
         <div className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white p-1 ring-1 ring-white/20 overflow-hidden">
-            <Image src="/logo-act.png" alt="ACT Sport Center" width={32} height={32} className="h-full w-full object-contain" priority />
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center">
+            <Image src="/logo-act-transparent.png" alt="ACT Sport Center" width={40} height={40} className="h-full w-full object-contain" priority />
           </span>
           <div>
             <h1 className="text-[15px] sm:text-base font-semibold tracking-tight leading-tight">Student Sports Skill Tracker</h1>
