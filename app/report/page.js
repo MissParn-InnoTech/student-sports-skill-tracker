@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { apiGet } from '@/lib/apiClient';
+import { BarChart3, Printer, Loader2 } from 'lucide-react';
 
 export default function ClassReportPage() {
   const [cfg, setCfg] = useState(null);
@@ -99,7 +100,12 @@ export default function ClassReportPage() {
     window.print();
   }
 
-  if (!cfg) return <div className="text-center text-slate-400 py-20">กำลังโหลด...</div>;
+  if (!cfg) return (
+    <div className="flex items-center justify-center gap-2 text-slate-400 py-20">
+      <Loader2 className="h-4 w-4 animate-spin" />
+      กำลังโหลด...
+    </div>
+  );
 
   const isAllSports = report && !report.sport;
 
@@ -128,7 +134,7 @@ export default function ClassReportPage() {
           </Field>
           <Field label="ประเภทกีฬา" className="col-span-2 md:col-span-1">
             <select className="input" value={sport} onChange={(e) => setSport(e.target.value)}>
-              <option value="">🏆 ทุกกีฬา (All Sports)</option>
+              <option value="">ทุกกีฬา (All Sports)</option>
               {cfg.sports.map((s) => (
                 <option key={s.name} value={s.name}>
                   {s.name}
@@ -139,9 +145,10 @@ export default function ClassReportPage() {
           <button
             onClick={loadReport}
             disabled={busy}
-            className="col-span-2 md:col-span-1 bg-[#C81E3A] hover:bg-[#a8172f] disabled:opacity-50 text-white font-semibold rounded-lg px-4 py-2 text-sm transition"
+            className="col-span-2 md:col-span-1 inline-flex items-center justify-center gap-1.5 bg-brand hover:bg-brand-dark disabled:opacity-50 text-white font-semibold rounded-lg px-4 py-2 text-sm transition"
           >
-            📊 ดูรายงาน
+            <BarChart3 className="h-4 w-4" strokeWidth={2.25} />
+            ดูรายงาน
           </button>
         </div>
       </div>
@@ -157,9 +164,10 @@ export default function ClassReportPage() {
             </div>
             <button
               onClick={printClassReport}
-              className="bg-slate-700 hover:bg-slate-800 text-white font-semibold rounded-lg px-4 py-2 text-sm transition"
+              className="inline-flex items-center gap-1.5 bg-slate-700 hover:bg-slate-800 text-white font-semibold rounded-lg px-4 py-2 text-sm transition"
             >
-              🖨️ พิมพ์ PDF
+              <Printer className="h-4 w-4" strokeWidth={2.25} />
+              พิมพ์ PDF
             </button>
           </div>
           <div className="overflow-auto">

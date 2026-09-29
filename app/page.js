@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { apiGet, apiPost } from '@/lib/apiClient';
 import { LEVEL_NAMES, initials } from '@/lib/levelMeta';
 import { SPORT_IMAGES } from '@/lib/sportImages';
+import { Search, RefreshCw, Sparkles, Save, Loader2 } from 'lucide-react';
 
 export default function CoachInputPage() {
   const [cfg, setCfg] = useState(null);
@@ -107,7 +108,12 @@ export default function CoachInputPage() {
   }
 
   if (!cfg) {
-    return <div className="text-center text-slate-400 py-20">{error || 'กำลังโหลดข้อมูลระบบ...'}</div>;
+    return (
+      <div className="flex items-center justify-center gap-2 text-slate-400 py-20">
+        {!error && <Loader2 className="h-4 w-4 animate-spin" />}
+        {error || 'กำลังโหลดข้อมูลระบบ...'}
+      </div>
+    );
   }
 
   return (
@@ -138,7 +144,7 @@ export default function CoachInputPage() {
                   onClick={() => setSport(s.name)}
                   className={
                     'flex-shrink-0 w-32 sm:w-36 rounded-xl border-2 overflow-hidden text-center transition ' +
-                    (selected ? 'border-[#C81E3A] ring-2 ring-[#C81E3A]/30' : 'border-slate-200 hover:border-slate-300')
+                    (selected ? 'border-brand ring-2 ring-brand/30' : 'border-slate-200 hover:border-slate-300')
                   }
                 >
                   <div className="w-full h-40 sm:h-48 bg-slate-100 overflow-hidden">
@@ -150,7 +156,7 @@ export default function CoachInputPage() {
                   <div
                     className={
                       'text-[11px] sm:text-xs font-semibold px-1 py-1.5 leading-tight ' +
-                      (selected ? 'text-[#C81E3A]' : 'text-slate-600')
+                      (selected ? 'text-brand' : 'text-slate-600')
                     }
                   >
                     {s.name}
@@ -192,9 +198,10 @@ export default function CoachInputPage() {
           <button
             onClick={loadRoster}
             disabled={busy}
-            className="bg-[#C81E3A] hover:bg-[#a8172f] disabled:opacity-50 text-white font-semibold rounded-lg px-4 py-2 text-sm transition"
+            className="inline-flex items-center justify-center gap-1.5 bg-brand hover:bg-brand-dark disabled:opacity-50 text-white font-semibold rounded-lg px-4 py-2 text-sm transition"
           >
-            🔍 ค้นหารายชื่อ
+            <Search className="h-4 w-4" strokeWidth={2.25} />
+            ค้นหารายชื่อ
           </button>
         </div>
       </div>
@@ -224,21 +231,28 @@ export default function CoachInputPage() {
                   {roster.map((r) => (
                     <tr key={r.studentId} className="border-b border-slate-100 last:border-0">
                       <td className="p-2 align-top whitespace-nowrap">
-                        <Link href={`/dashboard/${r.studentId}`} className="font-semibold text-[#C81E3A] hover:underline">
-                          <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-red-100 text-[#C81E3A] text-xs font-bold mr-1.5 align-middle">
+                        <Link href={`/dashboard/${r.studentId}`} className="font-semibold text-brand hover:underline">
+                          <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-red-100 text-brand text-xs font-bold mr-1.5 align-middle">
                             {initials(r.studentName)}
                           </span>
                           {r.studentName}
                         </Link>
                         <div className="text-xs mt-0.5">
                           {r.isCarryOver ? (
-                            <span className="inline-block bg-emerald-100 text-emerald-700 rounded px-1.5 py-0.5">🔄 ต่อยอด</span>
+                            <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-700 rounded px-1.5 py-0.5">
+                              <RefreshCw className="h-3 w-3" /> ต่อยอด
+                            </span>
                           ) : r.previousSport ? (
-                            <span className="inline-block bg-amber-100 text-amber-700 rounded px-1.5 py-0.5" title={'เดิมเล่น ' + r.previousSport}>
-                              🆕 เปลี่ยนกีฬา
+                            <span
+                              className="inline-flex items-center gap-1 bg-amber-100 text-amber-700 rounded px-1.5 py-0.5"
+                              title={'เดิมเล่น ' + r.previousSport}
+                            >
+                              <Sparkles className="h-3 w-3" /> เปลี่ยนกีฬา
                             </span>
                           ) : (
-                            <span className="inline-block bg-purple-100 text-purple-700 rounded px-1.5 py-0.5">🆕 นักเรียนใหม่</span>
+                            <span className="inline-flex items-center gap-1 bg-purple-100 text-purple-700 rounded px-1.5 py-0.5">
+                              <Sparkles className="h-3 w-3" /> นักเรียนใหม่
+                            </span>
                           )}
                         </div>
                       </td>
@@ -305,9 +319,10 @@ export default function CoachInputPage() {
             <button
               onClick={handleSave}
               disabled={busy}
-              className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-semibold rounded-lg px-5 py-2.5 text-sm transition whitespace-nowrap"
+              className="inline-flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-semibold rounded-lg px-5 py-2.5 text-sm transition whitespace-nowrap"
             >
-              💾 บันทึกคะแนนทั้งหมด
+              <Save className="h-4 w-4" strokeWidth={2.25} />
+              บันทึกคะแนนทั้งหมด
             </button>
           </div>
         </>

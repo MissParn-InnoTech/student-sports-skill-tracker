@@ -6,6 +6,7 @@ import { apiGet } from '@/lib/apiClient';
 import RadarChart from '@/components/RadarChart';
 import LineTrendChart from '@/components/LineTrendChart';
 import { LEVEL_NAMES } from '@/lib/levelMeta';
+import { Printer, Loader2, ArrowLeft } from 'lucide-react';
 
 const SCHOOL_INFO = { nameTh: 'โรงเรียนตัวอย่างพัฒนา', nameEn: 'Sample Development School', logoText: 'LOGO' };
 
@@ -26,7 +27,12 @@ export default function DashboardPage({ params }) {
   }, [id]);
 
   if (error) return <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 text-sm">{error}</div>;
-  if (!data) return <div className="text-center text-slate-400 py-20">กำลังโหลด...</div>;
+  if (!data) return (
+    <div className="flex items-center justify-center gap-2 text-slate-400 py-20">
+      <Loader2 className="h-4 w-4 animate-spin" />
+      กำลังโหลด...
+    </div>
+  );
 
   const { student, rounds, gradeTimeline } = data;
   const sorted = [...rounds].sort((a, b) => a.year - b.year || a.ts - b.ts);
@@ -112,8 +118,9 @@ export default function DashboardPage({ params }) {
 
   return (
     <div>
-      <Link href="/" className="text-sm text-[#C81E3A] hover:underline">
-        ← กลับหน้ากรอกคะแนน
+      <Link href="/" className="inline-flex items-center gap-1 text-sm text-brand hover:underline">
+        <ArrowLeft className="h-3.5 w-3.5" />
+        กลับหน้ากรอกคะแนน
       </Link>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 my-4 flex flex-wrap items-center justify-between gap-3">
@@ -126,9 +133,10 @@ export default function DashboardPage({ params }) {
         {latest && (
           <button
             onClick={printReportCard}
-            className="bg-[#C81E3A] hover:bg-[#a8172f] text-white font-semibold rounded-lg px-4 py-2 text-sm transition"
+            className="inline-flex items-center gap-1.5 bg-brand hover:bg-brand-dark text-white font-semibold rounded-lg px-4 py-2 text-sm transition"
           >
-            🖨️ พิมพ์ Report Card (PDF)
+            <Printer className="h-4 w-4" strokeWidth={2.25} />
+            พิมพ์ Report Card (PDF)
           </button>
         )}
       </div>

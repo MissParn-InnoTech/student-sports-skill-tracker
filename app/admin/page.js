@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { apiGet } from '@/lib/apiClient';
+import { Users, Medal, ClipboardCheck, Trophy, Clock, PieChart, BarChart2, TrendingUp, LineChart, Shuffle, History, Loader2, ArrowUp, ArrowDown } from 'lucide-react';
 
 function timeAgoTh(ts) {
   if (!ts) return '—';
@@ -16,13 +17,24 @@ function timeAgoTh(ts) {
   return new Date(ts).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
-function KpiCard({ icon, value, label }) {
+function KpiCard({ icon: Icon, value, label }) {
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
-      <div className="text-2xl mb-1">{icon}</div>
+      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand/10 text-brand mb-2">
+        <Icon className="h-[18px] w-[18px]" strokeWidth={2.25} />
+      </div>
       <div className="text-2xl font-bold text-slate-800 leading-tight">{value}</div>
       <div className="text-xs text-slate-500 mt-0.5">{label}</div>
     </div>
+  );
+}
+
+function SectionTitle({ icon: Icon, children, className = 'mb-3' }) {
+  return (
+    <h2 className={'flex items-center gap-2 font-semibold text-slate-700 ' + className}>
+      <Icon className="h-4 w-4 text-slate-400" strokeWidth={2.25} />
+      {children}
+    </h2>
   );
 }
 
@@ -42,21 +54,26 @@ export default function AdminOverviewPage() {
   }, []);
 
   if (error) return <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 text-sm">{error}</div>;
-  if (!data) return <div className="text-center text-slate-400 py-20">กำลังโหลด...</div>;
+  if (!data) return (
+    <div className="flex items-center justify-center gap-2 text-slate-400 py-20">
+      <Loader2 className="h-4 w-4 animate-spin" />
+      กำลังโหลด...
+    </div>
+  );
 
   return (
     <div>
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5">
-        <KpiCard icon="👥" value={data.totalActiveStudents} label="นักเรียน Active" />
-        <KpiCard icon="🏅" value={data.bySportLatest.length} label="ชนิดกีฬาที่กำลังเล่นอยู่" />
-        <KpiCard icon="📝" value={data.totalEvaluationRounds} label="รอบการประเมินสะสม" />
-        <KpiCard icon="🏆" value={data.sportAnalytics?.totalMaxAchievers ?? 0} label="นักเรียนที่ถึง Level สูงสุดแล้ว (สะสม)" />
-        <KpiCard icon="🕒" value={timeAgoTh(data.lastActivityTs)} label="กิจกรรมล่าสุด" />
+        <KpiCard icon={Users} value={data.totalActiveStudents} label="นักเรียน Active" />
+        <KpiCard icon={Medal} value={data.bySportLatest.length} label="ชนิดกีฬาที่กำลังเล่นอยู่" />
+        <KpiCard icon={ClipboardCheck} value={data.totalEvaluationRounds} label="รอบการประเมินสะสม" />
+        <KpiCard icon={Trophy} value={data.sportAnalytics?.totalMaxAchievers ?? 0} label="นักเรียนที่ถึง Level สูงสุดแล้ว (สะสม)" />
+        <KpiCard icon={Clock} value={timeAgoTh(data.lastActivityTs)} label="กิจกรรมล่าสุด" />
       </div>
 
       <div className="grid md:grid-cols-2 gap-4 mb-5">
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
-          <h2 className="font-semibold text-slate-700 mb-3">สัดส่วนกีฬาที่นักเรียนเล่นอยู่ตอนนี้</h2>
+          <SectionTitle icon={PieChart}>สัดส่วนกีฬาที่นักเรียนเล่นอยู่ตอนนี้</SectionTitle>
           {data.bySportLatest.length === 0 ? (
             <p className="text-sm text-slate-400 py-4 text-center">ยังไม่มีข้อมูลการประเมิน</p>
           ) : (
@@ -66,7 +83,7 @@ export default function AdminOverviewPage() {
                 <div key={s.sport} className="flex items-center gap-3 text-sm py-1.5">
                   <div className="w-40 truncate text-slate-600">{s.sport}</div>
                   <div className="flex-1 bg-slate-100 rounded-full h-3 overflow-hidden">
-                    <div className="h-full bg-[#C81E3A] rounded-full" style={{ width: Math.max(pct, 4) + '%' }} />
+                    <div className="h-full bg-brand rounded-full" style={{ width: Math.max(pct, 4) + '%' }} />
                   </div>
                   <div className="w-10 text-right font-semibold text-slate-700">{s.count}</div>
                 </div>
@@ -75,7 +92,7 @@ export default function AdminOverviewPage() {
           )}
         </div>
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
-          <h2 className="font-semibold text-slate-700 mb-3">จำนวนนักเรียน Active ต่อห้อง</h2>
+          <SectionTitle icon={BarChart2}>จำนวนนักเรียน Active ต่อห้อง</SectionTitle>
           {data.byClass.length === 0 ? (
             <p className="text-sm text-slate-400 py-4 text-center">ยังไม่มีข้อมูลชั้นเรียน</p>
           ) : (
@@ -90,7 +107,7 @@ export default function AdminOverviewPage() {
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 mb-5">
-        <h2 className="font-semibold text-slate-700 mb-1">Executive Dashboard: Retention Rate &amp; Time-to-Level-Up ต่อกีฬา</h2>
+        <SectionTitle icon={TrendingUp} className="mb-1">Executive Dashboard: Retention Rate &amp; Time-to-Level-Up ต่อกีฬา</SectionTitle>
         <p className="text-xs text-slate-400 mb-3">
           Retention Rate = % ของนักเรียนที่เรียนกีฬานั้นจน &ldquo;ถึง Level สูงสุด&rdquo; เทียบกับที่ย้ายไปกีฬาอื่นกลางคัน (ไม่นับคนที่ยังเรียนอยู่และยังสรุปผลไม่ได้)
           · Avg รอบ/เลเวล = จำนวน &ldquo;รอบการประเมิน&rdquo; เฉลี่ยที่ใช้ต่อการเลื่อนขึ้น 1 Level (ประเมินจากรอบที่บันทึกจริง ไม่ใช่จำนวนคาบเรียน)
@@ -132,7 +149,7 @@ export default function AdminOverviewPage() {
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 mb-5">
-        <h2 className="font-semibold text-slate-700 mb-1">ดัชนีความนิยมกีฬารายปี (Year-Over-Year Sport Popularity)</h2>
+        <SectionTitle icon={LineChart} className="mb-1">ดัชนีความนิยมกีฬารายปี (Year-Over-Year Sport Popularity)</SectionTitle>
         <p className="text-xs text-slate-400 mb-3">
           นับจำนวนนักเรียนไม่ซ้ำคนที่เรียนกีฬานั้นในแต่ละปีการศึกษา เรียงจากกีฬาที่มีคนเรียนมากที่สุดในปีล่าสุด
         </p>
@@ -159,8 +176,8 @@ export default function AdminOverviewPage() {
                       <td key={pt.year} className="py-2 px-3 text-center">
                         <span className="font-semibold text-slate-700">{pt.count}</span>
                         {pt.pctChange !== null && pt.pctChange !== 0 && (
-                          <span className={'ml-1 text-xs font-semibold ' + (pt.pctChange > 0 ? 'text-emerald-600' : 'text-red-500')}>
-                            {pt.pctChange > 0 ? '▲' : '▼'}
+                          <span className={'inline-flex items-center ml-1 text-xs font-semibold ' + (pt.pctChange > 0 ? 'text-emerald-600' : 'text-red-500')}>
+                            {pt.pctChange > 0 ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
                             {Math.abs(pt.pctChange)}%
                           </span>
                         )}
@@ -175,7 +192,7 @@ export default function AdminOverviewPage() {
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 mb-5">
-        <h2 className="font-semibold text-slate-700 mb-1">อัตราการย้ายสายกีฬา (Sport Switching Rate)</h2>
+        <SectionTitle icon={Shuffle} className="mb-1">อัตราการย้ายสายกีฬา (Sport Switching Rate)</SectionTitle>
         <p className="text-xs text-slate-400 mb-3">
           นักเรียนที่เลิกเล่นกีฬาหนึ่งแล้วไปเล่นกีฬาถัดไป มักย้ายไปเล่นกีฬาอะไรต่อมากที่สุด — ใช้ออกแบบเส้นทางพัฒนาการข้ามสายกีฬา (Cross-Sport Pathway)
         </p>
@@ -208,7 +225,7 @@ export default function AdminOverviewPage() {
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
-        <h2 className="font-semibold text-slate-700 mb-3">กิจกรรมล่าสุด (Audit Log)</h2>
+        <SectionTitle icon={History}>กิจกรรมล่าสุด (Audit Log)</SectionTitle>
         {data.recentActivity.length === 0 ? (
           <div className="text-sm text-slate-400 py-6 text-center">ยังไม่มีประวัติการบันทึก</div>
         ) : (

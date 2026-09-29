@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { apiGet, apiPost, apiPatch, apiDelete } from '@/lib/apiClient';
+import { UserPlus, Search, Pencil, Trash2, Loader2 } from 'lucide-react';
 
 function Field({ label, children, className = '' }) {
   return (
@@ -9,6 +10,19 @@ function Field({ label, children, className = '' }) {
       {label}
       {children}
     </label>
+  );
+}
+
+function StepHeader({ step, icon: Icon, children, className = 'mb-1' }) {
+  return (
+    <h2 className={'flex items-center gap-2 font-semibold text-slate-700 ' + className}>
+      {step ? (
+        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand text-[11px] font-bold text-white">{step}</span>
+      ) : (
+        <Icon className="h-4 w-4 text-slate-400" strokeWidth={2.25} />
+      )}
+      {children}
+    </h2>
   );
 }
 
@@ -223,7 +237,7 @@ export default function ManageStudentsPage() {
 
       {/* ตั้งค่ารายปีการศึกษา */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
-        <h2 className="font-semibold text-slate-700 mb-1">🗓️ ขั้นที่ 1: ตั้งค่าปีการศึกษาใหม่</h2>
+        <StepHeader step={1}>ตั้งค่าปีการศึกษาใหม่</StepHeader>
         <p className="text-xs text-slate-500 mb-3">
           เมื่อขึ้นปีการศึกษาใหม่ ใช้ฟอร์มนี้อัปเดต &quot;ปีการศึกษาปัจจุบัน&quot; ของนักเรียนที่ใช้งานอยู่ก่อน ระบบจะ<span className="font-semibold">ไม่เลื่อนชั้น/ย้ายห้องให้อัตโนมัติ</span> —
           ไปที่ขั้นที่ 2 ด้านล่างเพื่อจัดห้องใหม่และกำหนดกีฬาของปีนี้
@@ -249,7 +263,7 @@ export default function ManageStudentsPage() {
               ))}
             </select>
           </Field>
-          <button type="submit" disabled={busy} className="bg-[#C81E3A] hover:bg-[#a8172f] text-white font-semibold rounded-lg px-4 py-2 text-sm disabled:opacity-50">
+          <button type="submit" disabled={busy} className="bg-brand hover:bg-brand-dark text-white font-semibold rounded-lg px-4 py-2 text-sm disabled:opacity-50">
             ตั้งค่าปีการศึกษา
           </button>
         </form>
@@ -257,7 +271,7 @@ export default function ManageStudentsPage() {
 
       {/* จัดห้อง + กำหนดกีฬา (bulk) */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
-        <h2 className="font-semibold text-slate-700 mb-1">🧩 ขั้นที่ 2: จัดห้อง + กำหนดกีฬาประจำปีนี้ (ทำทีละหลายคน)</h2>
+        <StepHeader step={2}>จัดห้อง + กำหนดกีฬาประจำปีนี้ (ทำทีละหลายคน)</StepHeader>
         <p className="text-xs text-slate-500 mb-3">
           ติ๊กเลือกนักเรียนในตารางด้านล่าง (กรองด้วยห้องเดิมก่อนก็ได้) แล้วระบุห้องใหม่ และ/หรือ ชนิดกีฬาที่จะให้เล่นในปีการศึกษานี้ — เว้นช่องไหนว่างไว้ = ไม่แก้ไขค่านั้น
           กีฬาที่กำหนดเป็นเพียงค่า default สำหรับตอนกรอกคะแนน ไม่ใช่ผลประเมินจริง
@@ -276,7 +290,7 @@ export default function ManageStudentsPage() {
               ))}
             </select>
           </Field>
-          <button type="submit" disabled={busy} className="bg-[#C81E3A] hover:bg-[#a8172f] text-white font-semibold rounded-lg px-4 py-2 text-sm disabled:opacity-50">
+          <button type="submit" disabled={busy} className="bg-brand hover:bg-brand-dark text-white font-semibold rounded-lg px-4 py-2 text-sm disabled:opacity-50">
             ใช้กับนักเรียนที่เลือก ({selectedIds.size} คน)
           </button>
         </form>
@@ -284,7 +298,7 @@ export default function ManageStudentsPage() {
 
       {/* เพิ่มนักเรียนใหม่ */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
-        <h2 className="font-semibold text-slate-700 mb-3">➕ เพิ่มนักเรียนใหม่</h2>
+        <StepHeader icon={UserPlus} className="mb-3">เพิ่มนักเรียนใหม่</StepHeader>
         <form onSubmit={handleAdd} className="grid grid-cols-2 sm:grid-cols-6 gap-3 items-end">
           <Field label="เลขประจำตัว">
             <input className="input" required value={addForm.id} onChange={(e) => setAddForm((f) => ({ ...f, id: e.target.value }))} />
@@ -314,7 +328,7 @@ export default function ManageStudentsPage() {
               ))}
             </select>
           </Field>
-          <button type="submit" disabled={busy} className="bg-[#C81E3A] hover:bg-[#a8172f] text-white font-semibold rounded-lg px-4 py-2 text-sm disabled:opacity-50">
+          <button type="submit" disabled={busy} className="bg-brand hover:bg-brand-dark text-white font-semibold rounded-lg px-4 py-2 text-sm disabled:opacity-50">
             เพิ่มนักเรียน
           </button>
         </form>
@@ -324,7 +338,10 @@ export default function ManageStudentsPage() {
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
         <div className="flex flex-wrap items-end gap-3 mb-4">
           <Field label="ค้นหา (ชื่อ/เลขประจำตัว)">
-            <input className="input w-56" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="พิมพ์เพื่อค้นหา..." />
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+              <input className="input w-56 pl-8" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="พิมพ์เพื่อค้นหา..." />
+            </div>
           </Field>
           <Field label="ชั้นเรียน">
             <select className="input w-40" value={classFilter} onChange={(e) => setClassFilter(e.target.value)}>
@@ -346,8 +363,15 @@ export default function ManageStudentsPage() {
               ))}
             </select>
           </Field>
-          <div className="text-xs text-slate-400 ml-auto self-center">
-            {students ? `เลือกอยู่ ${selectedIds.size} คน · แสดง ${filtered.length} / ${students.length} คน` : 'กำลังโหลด...'}
+          <div className="flex items-center gap-1.5 text-xs text-slate-400 ml-auto self-center">
+            {students ? (
+              `เลือกอยู่ ${selectedIds.size} คน · แสดง ${filtered.length} / ${students.length} คน`
+            ) : (
+              <>
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                กำลังโหลด...
+              </>
+            )}
           </div>
         </div>
 
@@ -452,10 +476,12 @@ export default function ManageStudentsPage() {
                         </>
                       ) : (
                         <>
-                          <button onClick={() => startEdit(s)} className="text-xs font-semibold text-[#C81E3A] hover:underline mr-3">
+                          <button onClick={() => startEdit(s)} className="inline-flex items-center gap-1 text-xs font-semibold text-brand hover:underline mr-3">
+                            <Pencil className="h-3.5 w-3.5" />
                             แก้ไข
                           </button>
-                          <button onClick={() => handleDelete(s)} className="text-xs font-semibold text-slate-400 hover:text-red-600 hover:underline">
+                          <button onClick={() => handleDelete(s)} className="inline-flex items-center gap-1 text-xs font-semibold text-slate-400 hover:text-red-600 hover:underline">
+                            <Trash2 className="h-3.5 w-3.5" />
                             ลบ
                           </button>
                         </>
