@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { apiGet, apiPost, apiPatch, apiDelete } from '@/lib/apiClient';
-import { UserPlus, Search, Pencil, Trash2, Loader2 } from 'lucide-react';
+import { getActorName, setActorName } from '@/lib/currentUser';
+import { UserPlus, Search, Pencil, Trash2, Loader2, User } from 'lucide-react';
 
 function Field({ label, children, className = '' }) {
   return (
@@ -53,6 +54,13 @@ export default function ManageStudentsPage() {
 
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [bulkForm, setBulkForm] = useState({ className: '', assignedSport: '' });
+
+  const [actor, setActor] = useState(() => getActorName());
+
+  function handleActorChange(value) {
+    setActor(value);
+    setActorName(value);
+  }
 
   function showToast(msg, kind = 'ok') {
     setToast({ msg, kind });
@@ -121,7 +129,7 @@ export default function ManageStudentsPage() {
     e.preventDefault();
     try {
       setBusy(true);
-      await apiPost('/api/admin/students', { ...addForm, currentAcademicYear: Number(addForm.currentAcademicYear) });
+      await apiPost('/api/admin/students', { ...addForm, currentAcademicYear: Number(addForm.currentAcademicYear), actor: actor || undefined });
       showToast(`เพิ่มนักเรียน ${addForm.name} เรียบร้อย`);
       setAddForm(emptyForm);
       await loadStudents();
@@ -143,6 +151,7 @@ export default function ManageStudentsPage() {
       await apiPatch(`/api/admin/students/${encodeURIComponent(id)}`, {
         ...editForm,
         currentAcademicYear: Number(editForm.currentAcademicYear),
+        actor: actor || undefined,
       });
       showToast('บันทึกการแก้ไขเรียบร้อย');
       setEditingId(null);
@@ -158,7 +167,8 @@ export default function ManageStudentsPage() {
     if (!confirm(`ลบ "${s.name}" (${s.id}) ออกจากระบบถาวร?\n\nจะลบประวัติผลประเมินกีฬาทั้งหมดของนักเรียนคนนี้ไปด้วย และกู้คืนไม่ได้\n\nถ้าแค่ต้องการหยุดใช้งาน แนะนำกด "ตั้งไม่ใช้งาน" แทน`)) return;
     try {
       setBusy(true);
-      await apiDelete(`/api/admin/students/${encodeURIComponent(s.id)}`);
+      const qs = actor ? `?actor=${encodeURIComponent(actor)}` : '';
+      await apiDelete(`/api/admin/students/${encodeURIComponent(s.id)}${qs}`);
       showToast(`ลบ ${s.name} ออกจากระบบแล้ว`);
       await loadStudents();
     } catch (e) {
@@ -177,6 +187,7 @@ export default function ManageStudentsPage() {
       const result = await apiPost('/api/admin/academic-year', {
         year: Number(yearForm.year),
         className: yearForm.className || undefined,
+        actor: actor || undefined,
       });
       showToast(`ตั้งค่าปีการศึกษา ${result.year} ให้นักเรียน ${result.updatedCount} คนเรียบร้อย`);
       setYearForm({ year: '', className: '' });
@@ -208,6 +219,7 @@ export default function ManageStudentsPage() {
       const body = { studentIds: [...selectedIds] };
       if (bulkForm.className) body.className = bulkForm.className;
       if (bulkForm.assignedSport) body.assignedSport = bulkForm.assignedSport;
+      if (actor) body.actor = actor;
       const result = await apiPost('/api/admin/students/bulk-assign', body);
       showToast(`อัปเดตนักเรียน ${result.updatedCount} คนเรียบร้อย`);
       setBulkForm({ className: '', assignedSport: '' });
@@ -234,6 +246,21 @@ export default function ManageStudentsPage() {
           {toast.msg}
         </div>
       )}
+
+      {/* ผู้บันทึก - เก็บไว้ที่เครื่องนี้ ใช้บันทึกลง Audit Log ทุกครั้งที่แก้ไข/บันทึกข้อมูล */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
+        <Field label="ผู้บันทึก/แก้ไขข้อมูล (แนะนำให้กรอก - จะบันทึกลง Audit Log)" className="max-w-sm">
+          <div className="relative">
+            <User className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+            <input
+              className="input w-full pl-8"
+              placeholder="ชื่อ/อีเมลผู้ดูแลระบบ"
+              value={actor}
+              onChange={(e) => handleActorChange(e.target.value)}
+            />
+          </div>
+        </Field>
+      </div>
 
       {/* ตั้งค่ารายปีการศึกษา */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">

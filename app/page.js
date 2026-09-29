@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { apiGet, apiPost } from '@/lib/apiClient';
 import { LEVEL_NAMES, initials } from '@/lib/levelMeta';
 import { SPORT_IMAGES } from '@/lib/sportImages';
+import { getActorName, setActorName } from '@/lib/currentUser';
 import { Search, RefreshCw, Sparkles, Save, Loader2 } from 'lucide-react';
 
 export default function CoachInputPage() {
@@ -15,7 +16,7 @@ export default function CoachInputPage() {
   const [roster, setRoster] = useState(null); // ผลจาก /api/roster
   const [gridValues, setGridValues] = useState({}); // { studentId: { skillName: level } }
   const [notes, setNotes] = useState({}); // { studentId: note }
-  const [actor, setActor] = useState('');
+  const [actor, setActor] = useState(() => getActorName());
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [toastMsg, setToastMsg] = useState(null);
@@ -36,6 +37,11 @@ export default function CoachInputPage() {
       }
     })();
   }, []);
+
+  function handleActorChange(value) {
+    setActor(value);
+    setActorName(value);
+  }
 
   const sportObj = useMemo(() => cfg?.sports.find((s) => s.name === sport), [cfg, sport]);
 
@@ -192,7 +198,7 @@ export default function CoachInputPage() {
               className="input"
               placeholder="ชื่อ/อีเมลโค้ช"
               value={actor}
-              onChange={(e) => setActor(e.target.value)}
+              onChange={(e) => handleActorChange(e.target.value)}
             />
           </Field>
           <button
