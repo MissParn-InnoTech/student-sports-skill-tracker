@@ -37,9 +37,16 @@ import path from 'path';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const prisma = new PrismaClient();
 
-const ACADEMIC_YEAR = 2569;
+const ACADEMIC_YEAR = 2569; // ปีการศึกษาปัจจุบัน (ใช้เป็น currentAcademicYear ของ Student ด้วย)
+const PREV_ACADEMIC_YEAR = 2568; // ปีการศึกษาก่อนหน้า
 
-const REAL_NOTE = '[ผลประเมินจริง] นำเข้าจาก Master Sport Report (ชีต "รวม") — Level รวมของกีฬา ไม่ได้แยกรายทักษะ';
+// แก้ไข: เดิมสคริปต์นี้เอาค่า LV.เดิม (ของปี 2568) ไปยัดใส่ academicYear=2569 ทั้งหมด
+// ทำให้ computeStartingLevels() (lib/skillLogic.js) ที่หา log ปีก่อนหน้า (academicYear - 1)
+// เพื่อคำนวณ "ต่อยอด" ของปี 2569 หา log ปี 2568 ไม่เจอเลยสักคน (ทุกคนโดนนับเป็นนักเรียนใหม่)
+// ตอนนี้แยกให้ถูกต้อง: LV.เดิม -> บันทึกเป็นปี 2568 (ผลสุดท้ายของปีก่อน), LV.ใหม่ (ถ้ามี) ->
+// บันทึกเป็นปี 2569 (ผลประเมินจริงของปีนี้ที่มีอยู่แล้ว) — คนละแถวกัน ไม่ทับกัน
+const REAL_NOTE_PREV = '[ผลประเมินจริง] นำเข้าจาก Master Sport Report (ชีต "รวม") — LV.เดิม (ผลปีก่อนหน้า) ไม่ได้แยกรายทักษะ';
+const REAL_NOTE_CURRENT = '[ผลประเมินจริง] นำเข้าจาก Master Sport Report (ชีต "รวม") — LV.ใหม่ (ผลปีปัจจุบัน) ไม่ได้แยกรายทักษะ';
 
 // รหัสวิชา -> ชื่อกีฬาเต็มใน SPORTS_MASTER (lib/sportsConfig.js)
 // ยืนยันแล้วโดยเทียบกับตัวอย่างแถวจริงในชีตย่อยรายกีฬาที่แนบมาในไฟล์เดียวกัน
@@ -84,10 +91,11 @@ async function main() {
 
   const byId = new Map(); // studentId -> ข้อมูลห้องจริง (name/grade/room)
   const conflicts = [];
-  const skillRows = []; // แถวที่จะสร้าง SkillLog จริง
+  const skillRowsByKey = new Map(); // `${studentId}|${academicYear}|${sportName}` -> แถว (กันซ้ำตั้งแต่ตอน parse เลย)
   let skippedNoId = 0;
   let skippedUnmappedSport = 0;
   const unmappedSportCounts = {};
+  let duplicateRowsSkipped = 0;
 
   for (const line of lines) {
     const row = parseRow(line);
@@ -104,23 +112,39 @@ async function main() {
       conflicts.push({ studentId: row.studentId, a: `${existing.grade}/${existing.room}`, b: `${row.grade}/${row.room}` });
     }
 
-    // --- ผลประเมินจริง (ถ้ามี) ---
-    const level = parseLevel(row.lvNew) ?? parseLevel(row.lvOld);
-    if (level !== null) {
+    // --- ผลประเมินจริง (ถ้ามี) — แยกเป็นคนละปีการศึกษาตามคอลัมน์ที่มีค่า ---
+    const levelOld = parseLevel(row.lvOld);
+    const levelNew = parseLevel(row.lvNew);
+    if (levelOld !== null || levelNew !== null) {
       const sportName = sportCodeMap[row.subjectCode];
       if (!sportName) {
         skippedUnmappedSport++;
         unmappedSportCounts[row.subjectCode] = (unmappedSportCounts[row.subjectCode] || 0) + 1;
         continue;
       }
-      skillRows.push({
-        studentId: row.studentId,
-        studentName: `${row.firstName} ${row.lastName}`.trim(),
-        sportName,
-        level,
-      });
+      const studentName = `${row.firstName} ${row.lastName}`.trim();
+      const candidates = [];
+      if (levelOld !== null) candidates.push({ academicYear: PREV_ACADEMIC_YEAR, level: levelOld, note: REAL_NOTE_PREV });
+      if (levelNew !== null) candidates.push({ academicYear: ACADEMIC_YEAR, level: levelNew, note: REAL_NOTE_CURRENT });
+
+      for (const c of candidates) {
+        const key = `${row.studentId}|${c.academicYear}|${sportName}`;
+        if (skillRowsByKey.has(key)) {
+          duplicateRowsSkipped++; // คนเดียวกัน+กีฬาเดียวกัน+ปีเดียวกัน ปรากฏมากกว่า 1 แถวใน CSV (เช่น หลายคาบ/เทอม) - เก็บแถวแรกที่เจอ
+          continue;
+        }
+        skillRowsByKey.set(key, {
+          studentId: row.studentId,
+          studentName,
+          sportName,
+          level: c.level,
+          academicYear: c.academicYear,
+          note: c.note,
+        });
+      }
     }
   }
+  const skillRows = [...skillRowsByKey.values()];
 
   let studentsCreated = 0;
   for (const [studentId, row] of byId) {
@@ -138,17 +162,22 @@ async function main() {
   if (skillRows.length > 0) {
     const result = await prisma.skillLog.createMany({
       data: skillRows.map((r) => ({
-        academicYear: ACADEMIC_YEAR,
+        academicYear: r.academicYear,
         studentId: r.studentId,
         studentName: r.studentName,
         selectedSport: r.sportName,
         skillName: 'ภาพรวม (Overall)',
         finalLevel: r.level,
-        coachNotes: REAL_NOTE,
+        coachNotes: r.note,
       })),
     });
     skillLogsCreated = result.count;
   }
+
+  const countByYear = {};
+  skillRows.forEach((r) => {
+    countByYear[r.academicYear] = (countByYear[r.academicYear] || 0) + 1;
+  });
 
   await prisma.auditLog.create({
     data: {
@@ -156,11 +185,15 @@ async function main() {
       actor: 'import-script',
       academicYear: ACADEMIC_YEAR,
       studentCount: studentsCreated,
-      details: `นำเข้ารายชื่อนักเรียนจริงทั้งโรงเรียนจาก data/master_roster_2569_raw.csv (ชีต "รวม") — สำเร็จ ${studentsCreated} คน, สร้าง SkillLog จริง ${skillLogsCreated} รายการ (skillName="ภาพรวม (Overall)"), ข้ามผลประเมิน ${skippedUnmappedSport} รายการ (รหัสวิชายังไม่รองรับ: ${JSON.stringify(unmappedSportCounts)}), ข้าม ${skippedNoId} แถว (ไม่มีเลขประจำตัว), พบข้อมูลห้องขัดแย้ง ${conflicts.length} รายการ`,
+      details: `นำเข้ารายชื่อนักเรียนจริงทั้งโรงเรียนจาก data/master_roster_2569_raw.csv (ชีต "รวม") — สำเร็จ ${studentsCreated} คน, สร้าง SkillLog จริง ${skillLogsCreated} รายการ แยกตามปี: ${JSON.stringify(countByYear)} (skillName="ภาพรวม (Overall)"), ข้ามแถวซ้ำ (คนเดียวกัน+กีฬาเดียวกัน+ปีเดียวกัน) ${duplicateRowsSkipped} รายการ, ข้ามผลประเมิน ${skippedUnmappedSport} รายการ (รหัสวิชายังไม่รองรับ: ${JSON.stringify(unmappedSportCounts)}), ข้าม ${skippedNoId} แถว (ไม่มีเลขประจำตัว), พบข้อมูลห้องขัดแย้ง ${conflicts.length} รายการ`,
     },
   });
 
   console.log(`== นำเข้าสำเร็จ ${studentsCreated} คน, สร้าง SkillLog จริง ${skillLogsCreated} รายการ ==`);
+  console.log(`== แยกตามปีการศึกษา: ${JSON.stringify(countByYear)} ==`);
+  if (duplicateRowsSkipped > 0) {
+    console.log(`== ข้ามแถวซ้ำ (คนเดียวกัน+กีฬาเดียวกัน+ปีเดียวกัน ปรากฏหลายแถวใน CSV) ${duplicateRowsSkipped} รายการ — เก็บแถวแรกที่เจอ ==`);
+  }
   if (skippedUnmappedSport > 0) {
     console.log(`== ข้ามผลประเมิน ${skippedUnmappedSport} รายการ (รหัสวิชายังไม่รองรับ) ==`);
     Object.entries(unmappedSportCounts).forEach(([code, n]) => console.log(`  - ${code}: ${n} รายการ`));
