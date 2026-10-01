@@ -15,10 +15,10 @@ const LINKS = [
 export default function Header() {
   const pathname = usePathname();
   return (
-    <header className="no-print sticky top-0 z-30 bg-gradient-to-r from-brand-ink to-brand text-white shadow-md">
+    <header className="no-print sticky top-0 z-30 bg-gradient-to-r from-brand-ink via-brand-dark to-brand text-white shadow-md border-b-[3px] border-gold">
       <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-3">
         <div className="flex items-center gap-2.5">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/10 ring-2 ring-gold/70 p-1">
             <Image src="/logo-act-transparent.png" alt="ACT Sport Center" width={40} height={40} className="h-full w-full object-contain" priority />
           </span>
           <div>
@@ -35,7 +35,7 @@ export default function Header() {
                 key={l.href}
                 href={l.href}
                 className={
-                  'flex items-center gap-1.5 rounded-lg px-3 py-2 text-[13px] font-medium whitespace-nowrap transition ' +
+                  'flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[13px] font-medium whitespace-nowrap transition ' +
                   (active
                     ? 'bg-white text-brand-ink shadow-sm'
                     : 'text-white/85 hover:bg-white/10 hover:text-white')

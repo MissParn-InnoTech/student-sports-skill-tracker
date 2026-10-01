@@ -137,7 +137,7 @@ export default function CoachInputPage() {
 
   if (!cfg) {
     return (
-      <div className="flex items-center justify-center gap-2 text-slate-400 py-20">
+      <div className="flex items-center justify-center gap-2 text-ink/40 py-20">
         {!error && <Loader2 className="h-4 w-4 animate-spin" />}
         {error || 'กำลังโหลดข้อมูลระบบ...'}
       </div>
@@ -157,16 +157,16 @@ export default function CoachInputPage() {
         </div>
       )}
 
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 mb-5">
-        <h2 className="font-semibold text-slate-700 mb-3">เลือกปีการศึกษา ชั้นเรียน และกีฬา</h2>
+      <div className="bg-surface rounded-3xl border border-black/5 shadow-sm p-4 sm:p-5 mb-5">
+        <h2 className="font-semibold text-ink/80 mb-3">เลือกปีการศึกษา ชั้นเรียน และกีฬา</h2>
 
         <div className="mb-4">
-          <span className="block text-xs font-semibold text-slate-500 mb-2">ประเภทกีฬา</span>
+          <span className="block text-xs font-semibold text-ink/50 mb-2">ประเภทกีฬา</span>
           <div className="relative flex items-center gap-1">
             <button
               type="button"
               onClick={() => scrollSports(-1)}
-              className="hidden sm:flex flex-shrink-0 items-center justify-center w-8 h-8 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-500 shadow-sm"
+              className="hidden sm:flex flex-shrink-0 items-center justify-center w-8 h-8 rounded-full border border-black/10 bg-white hover:bg-paper text-ink/50 shadow-sm"
               aria-label="เลื่อนซ้าย"
             >
               <ChevronLeft className="h-4 w-4" />
@@ -184,11 +184,18 @@ export default function CoachInputPage() {
                   type="button"
                   onClick={() => setSport(s.name)}
                   className={
-                    'flex-shrink-0 w-32 sm:w-36 rounded-xl border-2 overflow-hidden text-center transition ' +
-                    (selected ? 'border-brand ring-2 ring-brand/30' : 'border-slate-200 hover:border-slate-300')
+                    'relative flex-shrink-0 w-32 sm:w-36 rounded-2xl border-2 overflow-hidden text-center transition ' +
+                    (selected
+                      ? 'border-brand ring-2 ring-gold/50 shadow-md -translate-y-0.5'
+                      : 'border-black/5 hover:border-brand/30 hover:-translate-y-0.5 hover:shadow-sm')
                   }
                 >
-                  <div className="w-full h-40 sm:h-48 bg-slate-100 overflow-hidden">
+                  {selected && (
+                    <span className="absolute top-1.5 right-1.5 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-brand text-white text-[11px] font-bold shadow">
+                      ✓
+                    </span>
+                  )}
+                  <div className="w-full h-40 sm:h-48 bg-gradient-to-b from-gold/15 to-brand/5 overflow-hidden">
                     {SPORT_IMAGES[s.name] && (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={SPORT_IMAGES[s.name]} alt={s.name} className="w-full h-full object-contain" />
@@ -197,7 +204,7 @@ export default function CoachInputPage() {
                   <div
                     className={
                       'text-[11px] sm:text-xs font-semibold px-1 py-1.5 leading-tight ' +
-                      (selected ? 'text-brand' : 'text-slate-600')
+                      (selected ? 'text-brand' : 'text-ink/60')
                     }
                   >
                     {s.name}
@@ -209,7 +216,7 @@ export default function CoachInputPage() {
             <button
               type="button"
               onClick={() => scrollSports(1)}
-              className="hidden sm:flex flex-shrink-0 items-center justify-center w-8 h-8 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-500 shadow-sm"
+              className="hidden sm:flex flex-shrink-0 items-center justify-center w-8 h-8 rounded-full border border-black/10 bg-white hover:bg-paper text-ink/50 shadow-sm"
               aria-label="เลื่อนขวา"
             >
               <ChevronRight className="h-4 w-4" />
@@ -246,11 +253,7 @@ export default function CoachInputPage() {
               onChange={(e) => handleActorChange(e.target.value)}
             />
           </Field>
-          <button
-            onClick={loadRoster}
-            disabled={busy}
-            className="inline-flex items-center justify-center gap-1.5 bg-brand hover:bg-brand-dark disabled:opacity-50 text-white font-semibold rounded-lg px-4 py-2 text-sm transition"
-          >
+          <button onClick={loadRoster} disabled={busy} className="btn-primary px-4 py-2.5 text-sm">
             <Search className="h-4 w-4" strokeWidth={2.25} />
             ค้นหารายชื่อ
           </button>
@@ -261,29 +264,29 @@ export default function CoachInputPage() {
 
       {roster && (
         <>
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 mb-5">
+          <div className="bg-surface rounded-3xl border border-black/5 shadow-sm p-4 sm:p-5 mb-5">
             <div className="flex flex-wrap gap-2 mb-4">
-              <span className="text-sm text-slate-500">พบนักเรียน {roster.length} คน</span>
+              <span className="text-sm text-ink/50">พบนักเรียน {roster.length} คน</span>
             </div>
-            <div className="overflow-auto rounded-xl border border-slate-200 max-h-[65vh]">
+            <div className="overflow-auto rounded-2xl border border-black/5 max-h-[65vh]">
               <table className="min-w-full border-collapse text-sm">
                 <thead>
-                  <tr className="bg-slate-50 text-left text-xs font-semibold text-slate-500">
-                    <th className="p-2 border-b border-slate-200">นักเรียน</th>
+                  <tr className="bg-paper text-left text-xs font-semibold text-ink/50">
+                    <th className="p-2 border-b border-black/5">นักเรียน</th>
                     {sportObj?.skills.map((sk) => (
-                      <th key={sk} className="p-2 border-b border-slate-200 text-center">
+                      <th key={sk} className="p-2 border-b border-black/5 text-center">
                         {sk}
                       </th>
                     ))}
-                    <th className="p-2 border-b border-slate-200">หมายเหตุ</th>
+                    <th className="p-2 border-b border-black/5">หมายเหตุ</th>
                   </tr>
                 </thead>
                 <tbody>
                   {roster.map((r) => (
-                    <tr key={r.studentId} className="border-b border-slate-100 last:border-0">
+                    <tr key={r.studentId} className="border-b border-black/5 last:border-0 hover:bg-paper/60 transition-colors">
                       <td className="p-2 align-top whitespace-nowrap">
                         <Link href={`/dashboard/${r.studentId}`} className="font-semibold text-brand hover:underline">
-                          <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-red-100 text-brand text-xs font-bold mr-1.5 align-middle">
+                          <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-gold/15 text-brand-dark text-xs font-bold mr-1.5 align-middle">
                             {initials(r.studentName)}
                           </span>
                           {r.studentName}
@@ -314,7 +317,7 @@ export default function CoachInputPage() {
                         return (
                           <td key={s.skillName} className={'p-1 text-center ' + diffClass}>
                             <select
-                              className="rounded border border-slate-300 text-sm px-1.5 py-1 w-full max-w-[90px]"
+                              className="input text-sm px-1.5 py-1 w-full max-w-[90px]"
                               value={current}
                               onChange={(e) => setLevel(r.studentId, s.skillName, e.target.value)}
                               title={'เริ่มต้น: Level ' + s.startingLevel}
@@ -330,7 +333,7 @@ export default function CoachInputPage() {
                       })}
                       <td className="p-1">
                         <input
-                          className="rounded border border-slate-300 text-sm px-2 py-1 w-full min-w-[140px]"
+                          className="input text-sm px-2 py-1 w-full min-w-[140px]"
                           placeholder="หมายเหตุโค้ช"
                           value={notes[r.studentId] || ''}
                           onChange={(e) => setNotes((prev) => ({ ...prev, [r.studentId]: e.target.value }))}
@@ -341,23 +344,23 @@ export default function CoachInputPage() {
                 </tbody>
               </table>
             </div>
-            <p className="text-xs text-slate-500 mt-3">
+            <p className="text-xs text-ink/50 mt-3">
               <span className="inline-block w-3 h-3 rounded bg-green-200 border border-green-500 align-middle mr-1"></span>
               ระดับสูงขึ้นจากแต้มตั้งต้น
               <span className="inline-block w-3 h-3 rounded bg-yellow-200 border border-yellow-500 align-middle ml-4 mr-1"></span>
               ระดับต่ำลงจากแต้มตั้งต้น
               <span className="ml-4">
-                คลิก <b>ชื่อนักเรียน</b> เพื่อดู Dashboard รายบุคคล
+                คลิก <b className="text-ink/70">ชื่อนักเรียน</b> เพื่อดู Dashboard รายบุคคล
               </span>
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
-            <h2 className="font-semibold text-slate-700 mb-3">เกณฑ์ระดับ 6 Level</h2>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-1 text-sm">
+          <div className="bg-surface rounded-3xl border border-black/5 shadow-sm p-4 sm:p-5">
+            <h2 className="font-semibold text-ink/80 mb-3">เกณฑ์ระดับ 6 Level</h2>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-1 text-sm text-ink/70">
               {[1, 2, 3, 4, 5, 6].map((lv) => (
                 <div key={lv}>
-                  <b>
+                  <b className="text-ink">
                     Level {lv} ({LEVEL_NAMES[lv]})
                   </b>
                 </div>
@@ -365,12 +368,12 @@ export default function CoachInputPage() {
             </div>
           </div>
 
-          <div className="fixed bottom-0 inset-x-0 bg-white border-t border-slate-200 shadow-[0_-4px_12px_rgba(0,0,0,.06)] px-4 sm:px-6 py-3 flex items-center gap-4 z-30">
-            <div className="flex-1 text-sm text-slate-700">พร้อมบันทึกคะแนน {roster.length} คน</div>
+          <div className="fixed bottom-0 inset-x-0 bg-surface/95 backdrop-blur border-t border-black/5 shadow-[0_-4px_20px_rgba(0,0,0,.08)] px-4 sm:px-6 py-3 flex items-center gap-4 z-30">
+            <div className="flex-1 text-sm text-ink/70">พร้อมบันทึกคะแนน {roster.length} คน</div>
             <button
               onClick={handleSave}
               disabled={busy}
-              className="inline-flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-semibold rounded-lg px-5 py-2.5 text-sm transition whitespace-nowrap"
+              className="btn-primary px-5 py-2.5 text-sm"
             >
               <Save className="h-4 w-4" strokeWidth={2.25} />
               บันทึกคะแนนทั้งหมด
@@ -384,7 +387,7 @@ export default function CoachInputPage() {
 
 function Field({ label, children, className = '' }) {
   return (
-    <label className={'flex flex-col gap-1 text-xs font-semibold text-slate-500 ' + className}>
+    <label className={'flex flex-col gap-1 text-xs font-semibold text-ink/50 ' + className}>
       {label}
       {children}
     </label>

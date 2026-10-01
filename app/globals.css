@@ -1,19 +1,32 @@
 @import "tailwindcss";
 
+/* โทนสี: โทนอุ่น (ครีม/ไหม้) คู่กับแดงเลือดหมู-ทองของ ACT แทนโทนเทาเย็นแบบ SaaS ทั่วไป
+   ให้ความรู้สึกเป็นมิตร อบอุ่น เข้ากับมาสคอต/ไอคอนกีฬาสไตล์การ์ตูน 3D แต่ยังดูเป็นมืออาชีพ */
 :root {
-  --background: #f1f5f9;
-  --foreground: #171717;
+  --background: #faf5ec;
+  --paper: #faf5ec;
+  --foreground: #2a1c18;
+  --ink: #2a1c18;
   --brand: #c81e3a;
-  --brand-dark: #a8172f;
-  --brand-ink: #141414;
+  --brand-dark: #8f1227;
+  --brand-ink: #3a0e18;
+  --gold: #e8a13a;
+  --gold-dark: #c7811f;
+  --surface: #ffffff;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-paper: var(--paper);
   --color-foreground: var(--foreground);
+  --color-ink: var(--ink);
   --color-brand: var(--brand);
   --color-brand-dark: var(--brand-dark);
   --color-brand-ink: var(--brand-ink);
+  --color-gold: var(--gold);
+  --color-gold-dark: var(--gold-dark);
+  --color-surface: var(--surface);
+  --font-sans: var(--font-mitr);
 }
 
 body {
@@ -22,16 +35,54 @@ body {
 }
 
 .input {
-  border-radius: 0.5rem;
-  border: 1px solid #cbd5e1;
+  border-radius: 0.75rem;
+  border: 1.5px solid #e4d7c6;
   padding: 0.5rem 0.75rem;
   font-size: 0.875rem;
   outline: none;
-  background: #fff;
+  background: var(--surface);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 .input:focus {
   border-color: var(--brand);
-  box-shadow: 0 0 0 2px rgba(200, 30, 58, 0.25);
+  box-shadow: 0 0 0 3px rgba(200, 30, 58, 0.15);
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+  box-shadow: 0 4px 14px rgba(200, 30, 58, 0.3);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+}
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(200, 30, 58, 0.38);
+}
+.btn-primary:disabled {
+  opacity: 0.5;
+  box-shadow: none;
+}
+
+.btn-gold {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  color: #4a2c05;
+  background: linear-gradient(135deg, #f3c06a, var(--gold));
+  box-shadow: 0 4px 14px rgba(199, 129, 31, 0.3);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.btn-gold:hover:not(:disabled) {
+  transform: translateY(-1px);
 }
 
 /* ===================== พิมพ์ Report Card / Class Report เป็น PDF (A4) ===================== */

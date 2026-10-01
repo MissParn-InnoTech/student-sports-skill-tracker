@@ -1,5 +1,13 @@
 import './globals.css';
+import { Mitr } from 'next/font/google';
 import Header from '@/components/Header';
+
+const mitr = Mitr({
+  subsets: ['thai', 'latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-mitr',
+  display: 'swap',
+});
 
 export const metadata = {
   title: 'Student Sports Skill Tracker',
@@ -8,8 +16,8 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="th">
-      <body className="bg-slate-100 text-slate-800 text-[15px] antialiased">
+    <html lang="th" className={mitr.variable}>
+      <body className="bg-paper text-ink text-[15px] antialiased">
         <Header />
         <main className="max-w-7xl mx-auto px-3 sm:px-6 py-5 pb-16">{children}</main>
         {/* มาสคอต ACT ตกแต่งมุมล่างขวา — ไม่บังการใช้งาน (pointer-events-none) และ
