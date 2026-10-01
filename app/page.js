@@ -1,15 +1,16 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { apiGet, apiPost } from '@/lib/apiClient';
 import { LEVEL_NAMES, initials } from '@/lib/levelMeta';
 import { SPORT_IMAGES } from '@/lib/sportImages';
 import { getActorName, setActorName } from '@/lib/currentUser';
-import { Search, RefreshCw, Sparkles, Save, Loader2 } from 'lucide-react';
+import { Search, RefreshCw, Sparkles, Save, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function CoachInputPage() {
   const [cfg, setCfg] = useState(null);
+  const sportScrollRef = useRef(null);
   const [year, setYear] = useState('');
   const [className, setClassName] = useState('');
   const [sport, setSport] = useState('');
@@ -41,6 +42,23 @@ export default function CoachInputPage() {
   function handleActorChange(value) {
     setActor(value);
     setActorName(value);
+  }
+
+  // แถบเลือกกีฬาเลื่อนแนวนอน: เมาส์/แทร็กแพดบางรุ่นส่งแต่ scroll แนวตั้ง (deltaY) มา
+  // ไม่ส่ง deltaX เลยทำให้เลื่อนซ้าย-ขวาด้วยการ scroll ปกติไม่ได้ จึงแปลง deltaY -> scrollLeft เอง
+  function handleSportWheel(e) {
+    const el = sportScrollRef.current;
+    if (!el) return;
+    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+      el.scrollLeft += e.deltaY;
+      e.preventDefault();
+    }
+  }
+
+  function scrollSports(dir) {
+    const el = sportScrollRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir * 220, behavior: 'smooth' });
   }
 
   const sportObj = useMemo(() => cfg?.sports.find((s) => s.name === sport), [cfg, sport]);
@@ -87,6 +105,10 @@ export default function CoachInputPage() {
 
   async function handleSave() {
     if (!roster || roster.length === 0) return;
+    if (!actor || !actor.trim()) {
+      showToast('กรุณากรอกรหัสประจำตัวครูผู้บันทึกก่อนบันทึกคะแนน', 'err');
+      return;
+    }
     const scores = [];
     roster.forEach((r) => {
       r.skills.forEach((s) => {
@@ -103,7 +125,7 @@ export default function CoachInputPage() {
     });
     try {
       setBusy(true);
-      const result = await apiPost('/api/scores', { scores, actor: actor || undefined });
+      const result = await apiPost('/api/scores', { scores, actor: actor.trim() });
       showToast('บันทึกสำเร็จ ' + result.rowsSaved + ' แถว');
       await loadRoster(); // โหลดใหม่เพื่อให้เห็นค่าล่าสุดต่อยอด
     } catch (e) {
@@ -140,8 +162,21 @@ export default function CoachInputPage() {
 
         <div className="mb-4">
           <span className="block text-xs font-semibold text-slate-500 mb-2">ประเภทกีฬา</span>
-          <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1">
-            {cfg.sports.map((s) => {
+          <div className="relative flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => scrollSports(-1)}
+              className="hidden sm:flex flex-shrink-0 items-center justify-center w-8 h-8 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-500 shadow-sm"
+              aria-label="เลื่อนซ้าย"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <div
+              ref={sportScrollRef}
+              onWheel={handleSportWheel}
+              className="flex gap-3 overflow-x-auto scroll-smooth pb-2 -mx-1 px-1"
+            >
+              {cfg.sports.map((s) => {
               const selected = sport === s.name;
               return (
                 <button
@@ -169,7 +204,16 @@ export default function CoachInputPage() {
                   </div>
                 </button>
               );
-            })}
+              })}
+            </div>
+            <button
+              type="button"
+              onClick={() => scrollSports(1)}
+              className="hidden sm:flex flex-shrink-0 items-center justify-center w-8 h-8 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-500 shadow-sm"
+              aria-label="เลื่อนขวา"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
           </div>
         </div>
 
@@ -193,10 +237,11 @@ export default function CoachInputPage() {
               ))}
             </select>
           </Field>
-          <Field label="ผู้บันทึก (ไม่บังคับ)">
+          <Field label="ผู้บันทึก (รหัสประจำตัวครู) *">
             <input
-              className="input"
-              placeholder="ชื่อ/อีเมลโค้ช"
+              className={'input' + (!actor.trim() ? ' border-red-300 focus:border-red-400' : '')}
+              placeholder="กรอกรหัสประจำตัวครู"
+              required
               value={actor}
               onChange={(e) => handleActorChange(e.target.value)}
             />
