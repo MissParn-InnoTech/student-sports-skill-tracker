@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { withErrorHandling } from '@/lib/apiHelpers';
 import { withApiKeyFromEnv } from '@/lib/apiAuth';
-import { upsertStudentFromSheet, upsertSkillLogFromSheet } from '@/lib/dataAccess';
+import { upsertStudentFromSheet, upsertSkillLogFromSheet, upsertOverallSkillLogFromGradeSheet } from '@/lib/dataAccess';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,6 +45,23 @@ function normalizeSkillLogRow(row) {
   };
 }
 
+/**
+ * map หัวคอลัมน์จริงของแท็บ "Data_Entry" ในชีต Grade_<กีฬา> (เช่น Grade_Futsal) -> ฟิลด์ภายในระบบ
+ * GradeSheetSync.gs (ติดตั้งบนชีตนี้โดยตรง) จะแปลงให้แล้วก่อนส่ง: ส่ง finalLevel เป็นตัวเลข 1-6
+ * หรือค่าว่าง (ถ้า LV.ใหม่/LV.เดิม ยังเป็น "PL" = ยังไม่ได้ประเมิน) และแนบ selectedSport/academicYear
+ * มาด้วยเสมอ (hardcode ไว้ในสคริปต์ของแต่ละไฟล์ เพราะชีตเองไม่มีคอลัมน์บอกชื่อกีฬา)
+ */
+function normalizeGradeEntryRow(row) {
+  return {
+    academicYear: row.academicYear,
+    studentId: row.studentId,
+    studentName: row.studentName,
+    className: row.className,
+    selectedSport: row.selectedSport,
+    finalLevel: row.finalLevel,
+  };
+}
+
 export const POST = withApiKeyFromEnv('SHEET_SYNC_SECRET', withErrorHandling(async (request) => {
   const body = await request.json();
   const { tab, row } = body;
@@ -57,5 +74,9 @@ export const POST = withApiKeyFromEnv('SHEET_SYNC_SECRET', withErrorHandling(asy
     const log = await upsertSkillLogFromSheet(normalizeSkillLogRow(row || {}));
     return NextResponse.json({ ok: true, log });
   }
-  return NextResponse.json({ error: `ไม่รู้จักแท็บ "${tab}" (ต้องเป็น Student_DB หรือ Skill_Logs)` }, { status: 400 });
+  if (tab === 'Data_Entry') {
+    const log = await upsertOverallSkillLogFromGradeSheet(normalizeGradeEntryRow(row || {}));
+    return NextResponse.json({ ok: true, log });
+  }
+  return NextResponse.json({ error: `ไม่รู้จักแท็บ "${tab}" (ต้องเป็น Student_DB, Skill_Logs หรือ Data_Entry)` }, { status: 400 });
 }));

@@ -43,6 +43,7 @@ model SkillLog {
   finalLevel    Int      @map("final_level")
   coachNotes    String?  @map("coach_notes")
 
+  @@unique([studentId, academicYear, selectedSport, skillName], name: "studentId_academicYear_selectedSport_skillName")
   @@index([studentId])
   @@index([academicYear, selectedSport])
   @@map("skill_logs")
