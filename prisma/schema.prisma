@@ -43,7 +43,11 @@ model SkillLog {
   finalLevel    Int      @map("final_level")
   coachNotes    String?  @map("coach_notes")
 
-  @@unique([studentId, academicYear, selectedSport, skillName], name: "studentId_academicYear_selectedSport_skillName")
+  // หมายเหตุ: ตั้งใจ "ถอด" @@unique([studentId, academicYear, selectedSport, skillName]) ออกชั่วคราว
+  // เพราะ Vercel build รัน `prisma db push` ตรงเข้า production ทุกครั้ง (ไม่ใช่ CI แยก) และ Prisma
+  // ปฏิเสธ (potential_dataloss) เพราะอาจมีแถวซ้ำอยู่แล้วในข้อมูลจริงที่จะขัดกับ constraint นี้
+  // ต้องตรวจสอบแถวซ้ำจริงก่อน (ดู /api/external/debug-duplicate-skill-logs) แล้วค่อยเพิ่มกลับ
+  // พร้อม migration ที่ dedupe ให้เรียบร้อยก่อน ไม่งั้น deploy จะค้างแบบนี้ไปเรื่อยๆ
   @@index([studentId])
   @@index([academicYear, selectedSport])
   @@map("skill_logs")
