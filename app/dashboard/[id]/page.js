@@ -35,6 +35,7 @@ export default function DashboardPage({ params }) {
   );
 
   const { student, rounds, gradeTimeline } = data;
+  const courseLogs = data.courseLogs || [];
   const sorted = [...rounds].sort((a, b) => a.year - b.year || a.ts - b.ts);
   const latest = sorted[sorted.length - 1] || null;
   const latestSkills = latest ? Object.keys(latest.levels) : [];
@@ -228,6 +229,39 @@ export default function DashboardPage({ params }) {
                     </tr>
                   );
                 })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {courseLogs.length > 0 && (
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 mt-5">
+          <h2 className="font-semibold text-slate-700 mb-1">คอร์สพิเศษ (นอกเวลา / Summer / October)</h2>
+          <p className="text-xs text-slate-400 mb-3">แยกจากผลประเมินภาคปกติ ช่องที่ครูยังไม่ได้กรอกจะเว้นว่างไว้</p>
+          <div className="overflow-auto">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="text-left text-xs font-semibold text-slate-400 border-b border-slate-200">
+                  <th className="py-2 pr-3">ปีการศึกษา</th>
+                  <th className="py-2 pr-3">ประเภทคอร์ส</th>
+                  <th className="py-2 pr-3">รหัสวิชา</th>
+                  <th className="py-2 pr-3">LV.เดิม</th>
+                  <th className="py-2 pr-3">LV.ใหม่</th>
+                  <th className="py-2">คะแนนรวม</th>
+                </tr>
+              </thead>
+              <tbody>
+                {courseLogs.map((c, i) => (
+                  <tr key={i} className="border-b border-slate-100 last:border-0">
+                    <td className="py-2 pr-3 text-slate-500">{c.academicYear}</td>
+                    <td className="py-2 pr-3 font-semibold text-slate-700">{c.courseType}</td>
+                    <td className="py-2 pr-3">{c.sportCode}</td>
+                    <td className="py-2 pr-3">{c.levelOld || <span className="text-slate-300 font-normal">—</span>}</td>
+                    <td className="py-2 pr-3 font-semibold">{c.levelNew || <span className="text-slate-300 font-normal">—</span>}</td>
+                    <td className="py-2">{c.totalScore === null || c.totalScore === undefined ? <span className="text-slate-300 font-normal">—</span> : c.totalScore}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
