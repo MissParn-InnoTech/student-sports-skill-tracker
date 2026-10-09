@@ -64,3 +64,73 @@ model AuditLog {
 
   @@map("audit_log")
 }
+
+// ---------------------------------------------------------------------------
+// ตารางด้านล่างนี้ถูกสร้างและอ่าน/เขียนด้วย raw SQL (lib/courseLogs.js, lib/centralScores.js)
+// โค้ดไม่ได้เรียกผ่าน Prisma Client — แต่ "ต้อง" ประกาศไว้ที่นี่ให้ตรงกับตารางจริงทุกคอลัมน์
+// เพราะ build บน Vercel รัน `prisma db push` ซึ่งจะพยายาม "ลบ" ทุกตารางที่ไม่มีใน schema นี้
+// (ถ้าตารางมีข้อมูล build จะล้มด้วย data loss warning — ห้ามแก้ด้วย --accept-data-loss
+// เพราะจะลบคะแนนคอร์สพิเศษทิ้งจริง) ถ้าเพิ่มตาราง raw SQL ใหม่ ให้เพิ่ม model ที่นี่ด้วยเสมอ
+// ---------------------------------------------------------------------------
+model central_scores {
+  id          Int     @id @default(autoincrement())
+  sync_id     String
+  row_no      Int?
+  student_id  String?
+  prefix      String?
+  first_name  String?
+  last_name   String?
+  class_name  String?
+  sport_code  String?
+  level_old   String?
+  level_new   String?
+  total_score String?
+}
+
+model central_scores_sync {
+  sync_id      String   @id
+  row_count    Int
+  completed_at DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model course_skill_details {
+  id            Int      @id @default(autoincrement())
+  student_id    String
+  academic_year Int
+  sport_code    String
+  course_type   String
+  skill_name    String
+  final_level   Int
+  coach_notes   String?
+  actor         String?
+  updated_at    DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([student_id, academic_year, sport_code, course_type, skill_name])
+}
+
+model course_skill_logs {
+  id            Int      @id @default(autoincrement())
+  student_id    String
+  student_name  String?
+  class_name    String?
+  academic_year Int
+  sport_code    String
+  course_type   String
+  level_old     String?
+  level_new     String?
+  total_score   Float?
+  updated_at    DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([student_id, academic_year, sport_code, course_type])
+}
+
+// สำเนาแถวเดิมของ skill_logs ก่อนถูกแก้โดยเครื่องมือ /admin/fix-running (lib/runningFix.js)
+model skill_logs_sport_fix_backup {
+  id             Int      @id @default(autoincrement())
+  skill_log_id   Int
+  action         String
+  original_sport String
+  new_sport      String?
+  original_row   String
+  fixed_at       DateTime @default(now()) @db.Timestamptz(6)
+}
