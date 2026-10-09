@@ -85,15 +85,16 @@ export const POST = withApiKeyFromEnv('SHEET_SYNC_SECRET', withErrorHandling(asy
     const list = Array.isArray(body.rows) ? body.rows : [row || {}];
     let saved = 0;
     const errors = [];
+    const stored = []; // ค่าที่เก็บอยู่จริงหลังรวมกับคะแนนที่กรอกผ่านหน้าเว็บ (ชีตใช้เติมช่องว่างใน Course_Scores)
     for (const r of list) {
       try {
-        await upsertCourseLog(r || {});
+        stored.push(await upsertCourseLog(r || {}));
         saved++;
       } catch (err) {
         errors.push({ studentId: r?.studentId ?? null, error: err.message });
       }
     }
-    return NextResponse.json({ ok: errors.length === 0, saved, errors });
+    return NextResponse.json({ ok: errors.length === 0, saved, errors, rows: stored });
   }
   return NextResponse.json({ error: `ไม่รู้จักแท็บ "${tab}" (ต้องเป็น Student_DB, Skill_Logs หรือ Data_Entry)` }, { status: 400 });
 }));
