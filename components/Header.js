@@ -3,10 +3,11 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { ClipboardList, BarChart3, LayoutDashboard, Users } from 'lucide-react';
+import { ClipboardList, BarChart3, LayoutDashboard, Users, GraduationCap } from 'lucide-react';
 
 const LINKS = [
   { href: '/', label: 'กรอกคะแนน', icon: ClipboardList },
+  { href: '/course', label: 'คอร์สพิเศษ', icon: GraduationCap },
   { href: '/report', label: 'รายงานรายห้อง', icon: BarChart3 },
   { href: '/admin', label: 'ภาพรวมระบบ', icon: LayoutDashboard },
   { href: '/admin/students', label: 'จัดการนักเรียน', icon: Users },
