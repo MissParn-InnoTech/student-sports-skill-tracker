@@ -8,11 +8,13 @@ import { SPORT_IMAGES } from '@/lib/sportImages';
 import { getActorName, setActorName } from '@/lib/currentUser';
 import { Search, RefreshCw, Sparkles, Save, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 
+const COURSE_TYPES = ['AFTER SCHOOL', 'OCTOBER', 'SUMMER'];
+
 export default function CoachInputPage() {
   const [cfg, setCfg] = useState(null);
   const sportScrollRef = useRef(null);
   const [year, setYear] = useState('');
-  const [className, setClassName] = useState('');
+  const [course, setCourse] = useState(COURSE_TYPES[0]);
   const [sport, setSport] = useState('');
   const [roster, setRoster] = useState(null); // ผลจาก /api/roster
   const [gridValues, setGridValues] = useState({}); // { studentId: { skillName: level } }
@@ -29,7 +31,6 @@ export default function CoachInputPage() {
         const data = await apiGet('/api/initial-data');
         setCfg(data);
         setYear(String(data.defaultYear || data.years[0] || ''));
-        setClassName(data.classes[0] || '');
         setSport(data.sports[0]?.name || '');
       } catch (e) {
         setError(e.message);
@@ -69,15 +70,15 @@ export default function CoachInputPage() {
   }
 
   async function loadRoster() {
-    if (!year || !className || !sport) {
-      showToast('กรุณาเลือกปีการศึกษา ชั้นเรียน และกีฬาให้ครบ', 'err');
+    if (!year || !course || !sport) {
+      showToast('กรุณาเลือกชนิดกีฬา ปีการศึกษา และคอร์สให้ครบ', 'err');
       return;
     }
     try {
       setBusy(true);
       setError('');
       const data = await apiGet(
-        `/api/roster?year=${encodeURIComponent(year)}&class=${encodeURIComponent(className)}&sport=${encodeURIComponent(sport)}`
+        `/api/course-roster?year=${encodeURIComponent(year)}&course=${encodeURIComponent(course)}&sport=${encodeURIComponent(sport)}`
       );
       setRoster(data);
       const initGrid = {};
@@ -88,7 +89,11 @@ export default function CoachInputPage() {
         });
       });
       setGridValues(initGrid);
-      setNotes({});
+      const initNotes = {};
+      data.forEach((r) => {
+        if (r.note) initNotes[r.studentId] = r.note;
+      });
+      setNotes(initNotes);
     } catch (e) {
       setError(e.message);
     } finally {
@@ -113,10 +118,7 @@ export default function CoachInputPage() {
     roster.forEach((r) => {
       r.skills.forEach((s) => {
         scores.push({
-          academicYear: Number(year),
           studentId: r.studentId,
-          studentName: r.studentName,
-          selectedSport: sport,
           skillName: s.skillName,
           finalLevel: gridValues[r.studentId]?.[s.skillName] ?? s.startingLevel,
           coachNotes: notes[r.studentId] || '',
@@ -125,7 +127,13 @@ export default function CoachInputPage() {
     });
     try {
       setBusy(true);
-      const result = await apiPost('/api/scores', { scores, actor: actor.trim() });
+      const result = await apiPost('/api/course-roster', {
+        academicYear: Number(year),
+        courseType: course,
+        sportName: sport,
+        scores,
+        actor: actor.trim(),
+      });
       showToast('บันทึกสำเร็จ ' + result.rowsSaved + ' แถว');
       await loadRoster(); // โหลดใหม่เพื่อให้เห็นค่าล่าสุดต่อยอด
     } catch (e) {
@@ -158,7 +166,7 @@ export default function CoachInputPage() {
       )}
 
       <div className="bg-surface rounded-3xl border border-black/5 shadow-sm p-4 sm:p-5 mb-5">
-        <h2 className="font-semibold text-ink/80 mb-3">เลือกปีการศึกษา ชั้นเรียน และกีฬา</h2>
+        <h2 className="font-semibold text-ink/80 mb-3">เลือกชนิดกีฬา ปีการศึกษา และคอร์ส</h2>
 
         <div className="mb-4">
           <span className="block text-xs font-semibold text-ink/50 mb-2">ประเภทกีฬา</span>
@@ -235,9 +243,9 @@ export default function CoachInputPage() {
               {!cfg.years.includes(Number(year)) && year && <option value={year}>{year}</option>}
             </select>
           </Field>
-          <Field label="ชั้นเรียน">
-            <select className="input" value={className} onChange={(e) => setClassName(e.target.value)}>
-              {cfg.classes.map((c) => (
+          <Field label="คอร์ส">
+            <select className="input" value={course} onChange={(e) => setCourse(e.target.value)}>
+              {COURSE_TYPES.map((c) => (
                 <option key={c} value={c}>
                   {c}
                 </option>
@@ -266,7 +274,11 @@ export default function CoachInputPage() {
         <>
           <div className="bg-surface rounded-3xl border border-black/5 shadow-sm p-4 sm:p-5 mb-5">
             <div className="flex flex-wrap gap-2 mb-4">
-              <span className="text-sm text-ink/50">พบนักเรียน {roster.length} คน</span>
+              <span className="text-sm text-ink/50">
+                {roster.length > 0
+                  ? 'พบนักเรียน ' + roster.length + ' คน'
+                  : 'ยังไม่มีนักเรียนลงคอร์สนี้ในกีฬาและปีที่เลือก — รายชื่อมาจากต้นขั้ว (แท็บ Course_Register) ใน Google Sheet'}
+              </span>
             </div>
             <div className="overflow-auto rounded-2xl border border-black/5 max-h-[65vh]">
               <table className="min-w-full border-collapse text-sm">
@@ -292,7 +304,12 @@ export default function CoachInputPage() {
                           {r.studentName}
                         </Link>
                         <div className="text-xs mt-0.5">
-                          {r.isCarryOver ? (
+                          {r.className && <span className="text-ink/50 mr-1.5">{r.className}</span>}
+                          {r.saved ? (
+                            <span className="inline-flex items-center gap-1 bg-sky-100 text-sky-700 rounded px-1.5 py-0.5">
+                              <Save className="h-3 w-3" /> บันทึกแล้ว
+                            </span>
+                          ) : r.isCarryOver ? (
                             <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-700 rounded px-1.5 py-0.5">
                               <RefreshCw className="h-3 w-3" /> ต่อยอด
                             </span>
