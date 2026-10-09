@@ -3,6 +3,7 @@ import { withErrorHandling } from '@/lib/apiHelpers';
 import { withApiKeyFromEnv } from '@/lib/apiAuth';
 import { upsertStudentFromSheet, upsertSkillLogFromSheet, upsertOverallSkillLogFromGradeSheet } from '@/lib/dataAccess';
 import { upsertCourseLog } from '@/lib/courseLogs';
+import { receiveCentralScoresBatch } from '@/lib/centralScores';
 
 export const dynamic = 'force-dynamic';
 
@@ -96,5 +97,10 @@ export const POST = withApiKeyFromEnv('SHEET_SYNC_SECRET', withErrorHandling(asy
     }
     return NextResponse.json({ ok: errors.length === 0, saved, errors, rows: stored });
   }
-  return NextResponse.json({ error: `ไม่รู้จักแท็บ "${tab}" (ต้องเป็น Student_DB, Skill_Logs หรือ Data_Entry)` }, { status: 400 });
+  if (tab === 'Central_Scores') {
+    // สำเนาแท็บ Central_Scores ทั้งแท็บ (ส่งเป็นชุด ๆ) ใช้เป็นแหล่งข้อมูลของหน้า "ภาพรวมระบบ"
+    const result = await receiveCentralScoresBatch({ syncId: body.syncId, rows: body.rows, final: body.final === true });
+    return NextResponse.json(result);
+  }
+  return NextResponse.json({ error: `ไม่รู้จักแท็บ "${tab}" (ต้องเป็น Student_DB, Skill_Logs, Data_Entry, Course_Entry หรือ Central_Scores)` }, { status: 400 });
 }));
