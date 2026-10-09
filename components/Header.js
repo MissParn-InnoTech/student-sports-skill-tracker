@@ -9,7 +9,7 @@ const LINKS = [
   { href: '/', label: 'กรอกคะแนน', icon: ClipboardList },
   { href: '/course', label: 'คอร์สพิเศษ', icon: GraduationCap },
   { href: '/report', label: 'รายงานรายห้อง', icon: BarChart3 },
-  { href: '/admin', label: 'ภาพรวมระบบ', icon: LayoutDashboard },
+  { href: '/admin', label: 'รายงานผู้บริหาร', icon: LayoutDashboard },
   { href: '/admin/students', label: 'จัดการนักเรียน', icon: Users },
 ];
 

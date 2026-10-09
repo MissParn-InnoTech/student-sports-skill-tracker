@@ -1,23 +1,21 @@
 /**
- * CentralScoresSync.gs
+ * CentralScoresSync.gs  (รุ่นรายงานผู้บริหาร)
  * -----------------------------------------------------------------------
- * ติดตั้งบน Google Sheet "Master_Sports_System" (ไฟล์เดียวกับที่มีแท็บ Central_Scores)
- *   เปิด Sheet > ส่วนขยาย > Apps Script > กด + > สคริปต์ > ตั้งชื่อ CentralScoresSync
- *   > วางโค้ดนี้ทั้งหมด > บันทึก > กลับไปรีเฟรชหน้า Sheet 1 ครั้ง
+ * ติดตั้งบน Google Sheet "Master_Sports_System"
+ *   เปิด Sheet > ส่วนขยาย > Apps Script > เปิดไฟล์ CentralScoresSync เดิม
+ *   > ลบโค้ดเดิมทั้งหมด > วางโค้ดนี้แทน > บันทึก > กลับไปรีเฟรชหน้า Sheet 1 ครั้ง
  *
- * ทำหน้าที่: ส่งข้อมูล "ทั้งแท็บ Central_Scores" ไปให้หน้า "ภาพรวมระบบ" ของเว็บ
- *   https://student-sports-skill-tracker.vercel.app/admin
- * อ่านอย่างเดียว ไม่แก้ไขข้อมูลใด ๆ ในชีต
+ * ทำหน้าที่: ส่งข้อมูล 3 แท็บ (Student_Register, Central_Scores, Course_Register) ไปให้หน้า
+ *   "รายงานผู้บริหาร" ของเว็บ  https://student-sports-skill-tracker.vercel.app/admin
+ * อ่านอย่างเดียว ไม่แก้ไขข้อมูลใด ๆ ในชีต · Student_Register / Course_Register ส่งเฉพาะคอลัมน์ที่ใช้
+ * ทำสถิติ (ไม่ส่งชื่อ-นามสกุล)
  *
  * ใช้ค่าตั้งเดิมของไฟล์นี้ (Script Properties):
  *   WEBHOOK_URL       = https://student-sports-skill-tracker.vercel.app/api/external/sheet-webhook
  *   SHEET_SYNC_SECRET = ค่าเดียวกับ env var SHEET_SYNC_SECRET บน Vercel
- * ถ้ายังไม่เคยตั้ง: Apps Script > การตั้งค่าโครงการ (รูปเฟือง) > คุณสมบัติของสคริปต์ > เพิ่ม 2 ค่านี้
  *
- * หมายเหตุ: ไฟล์นี้ไม่มีฟังก์ชัน onOpen เพื่อไม่ชนกับ onOpen ของสคริปต์เดิมในไฟล์
- *   - ครั้งแรก: เลือกฟังก์ชัน installCentralOverviewMenu แล้วกด "เรียกใช้" 1 ครั้ง
- *     (จะเพิ่มเมนู "📊 ภาพรวมเว็บ" ให้ทุกครั้งที่เปิดไฟล์ โดยไม่แตะ onOpen เดิม)
- *   - หรือจะกด "เรียกใช้" ฟังก์ชัน pushCentralScoresToWeb จากหน้า Apps Script โดยตรงก็ได้
+ * ชื่อฟังก์ชันและ trigger เดิมยังใช้ได้ทั้งหมด (เมนู "📊 ภาพรวมเว็บ" และการส่งอัตโนมัติทุกชั่วโมง
+ * จะส่งครบทั้ง 3 แท็บโดยไม่ต้องตั้งค่าใหม่)
  */
 
 var CENTRAL_TAB = 'Central_Scores';
@@ -37,6 +35,25 @@ var CENTRAL_HEADER_MAP = {
   'คะแนนรวม': 'totalScore',
 };
 
+/** แท็บทะเบียน: ส่งเฉพาะฟิลด์ที่ใช้ทำสถิติ */
+var REGISTER_HEADER_MAP = {
+  'รหัสประจำตัว': 'studentId',
+  'คำนำหน้า': 'prefix',
+  'ชั้น/ห้อง': 'className',
+  'วิชา': 'sportCode',
+  'รหัสวิชา': 'sportCode',
+  'LV.เดิม': 'levelOld',
+  'ประเภทคอร์ส': 'courseType',
+  'ปีการศึกษา': 'academicYear',
+  'สถานะส่ง': 'status',
+};
+
+var OVERVIEW_TABS = [
+  { tab: 'Student_Register', map: REGISTER_HEADER_MAP, required: ['studentId', 'className', 'sportCode', 'levelOld'] },
+  { tab: 'Central_Scores', map: CENTRAL_HEADER_MAP, required: ['studentId', 'className', 'sportCode', 'levelOld', 'levelNew', 'totalScore'] },
+  { tab: 'Course_Register', map: REGISTER_HEADER_MAP, required: ['studentId', 'className', 'courseType'] },
+];
+
 /** รันครั้งเดียว: ติดตั้ง trigger ให้เมนู "📊 ภาพรวมเว็บ" โผล่ทุกครั้งที่เปิดไฟล์ */
 function installCentralOverviewMenu() {
   var ss = SpreadsheetApp.getActive();
@@ -50,7 +67,7 @@ function installCentralOverviewMenu() {
 function addCentralOverviewMenu_() {
   SpreadsheetApp.getUi()
     .createMenu('📊 ภาพรวมเว็บ')
-    .addItem('ส่ง Central_Scores ไปหน้าภาพรวม', 'pushCentralScoresToWeb')
+    .addItem('ส่งข้อมูลทั้งหมดไปรายงานผู้บริหาร', 'pushCentralScoresToWeb')
     .addItem('ตั้งให้ส่งอัตโนมัติทุกชั่วโมง', 'installCentralHourlySync')
     .addItem('ยกเลิกการส่งอัตโนมัติ', 'removeCentralHourlySync')
     .addToUi();
@@ -59,7 +76,7 @@ function addCentralOverviewMenu_() {
 function installCentralHourlySync() {
   removeCentralHourlySync_();
   ScriptApp.newTrigger('pushCentralScoresToWebSilent_').timeBased().everyHours(1).create();
-  notify_('ตั้งค่าแล้ว: จะส่ง Central_Scores ไปหน้าภาพรวมของเว็บทุก 1 ชั่วโมง');
+  notify_('ตั้งค่าแล้ว: จะส่งข้อมูลไปหน้ารายงานผู้บริหารของเว็บทุก 1 ชั่วโมง');
 }
 
 function removeCentralHourlySync() {
@@ -79,12 +96,13 @@ function pushCentralScoresToWebSilent_() {
   console.log(result.message);
 }
 
-/** ส่งทั้งแท็บ Central_Scores ไปเว็บ แล้วแจ้งผล */
+/** ส่งทั้ง 3 แท็บไปเว็บ แล้วแจ้งผล */
 function pushCentralScoresToWeb() {
   var result = pushCentralScores_();
   notify_(result.message);
 }
 
+/** ส่งทุกแท็บใน OVERVIEW_TABS ทีละแท็บ แท็บใดส่งไม่สำเร็จ เว็บจะยังแสดงข้อมูลรอบก่อนหน้าของแท็บนั้น */
 function pushCentralScores_() {
   var props = PropertiesService.getScriptProperties();
   var webhookUrl = props.getProperty('WEBHOOK_URL');
@@ -92,13 +110,23 @@ function pushCentralScores_() {
   if (!webhookUrl || !secret) {
     return { ok: false, message: 'ยังไม่ได้ตั้งค่า WEBHOOK_URL / SHEET_SYNC_SECRET ใน Script Properties' };
   }
+  var ok = true;
+  var lines = [];
+  OVERVIEW_TABS.forEach(function (cfg) {
+    var r = pushOneTab_(cfg, webhookUrl, secret);
+    if (!r.ok) ok = false;
+    lines.push((r.ok ? '✅ ' : '⚠️ ') + r.message);
+  });
+  return { ok: ok, message: lines.join('\n') };
+}
 
-  var sheet = SpreadsheetApp.getActive().getSheetByName(CENTRAL_TAB);
-  if (!sheet) return { ok: false, message: 'ไม่พบแท็บ "' + CENTRAL_TAB + '"' };
+function pushOneTab_(cfg, webhookUrl, secret) {
+  var sheet = SpreadsheetApp.getActive().getSheetByName(cfg.tab);
+  if (!sheet) return { ok: false, message: 'ไม่พบแท็บ "' + cfg.tab + '"' };
 
   var lastRow = sheet.getLastRow();
   var lastCol = sheet.getLastColumn();
-  if (lastRow < 1 || lastCol < 1) return { ok: false, message: 'แท็บ "' + CENTRAL_TAB + '" ว่าง' };
+  if (lastRow < 1 || lastCol < 1) return { ok: false, message: 'แท็บ "' + cfg.tab + '" ว่าง' };
 
   // getDisplayValues: ได้ค่าตามที่เห็นบนหน้าจอ (รหัสประจำตัวไม่กลายเป็น 36355.0)
   var values = sheet.getRange(1, 1, lastRow, lastCol).getDisplayValues();
@@ -106,16 +134,15 @@ function pushCentralScores_() {
   var fieldByCol = [];
   var found = {};
   headers.forEach(function (h, i) {
-    var field = CENTRAL_HEADER_MAP[String(h).trim()];
+    var field = cfg.map[String(h).trim()];
     if (field && !found[field]) {
       fieldByCol[i] = field;
       found[field] = true;
     }
   });
-  var required = ['studentId', 'className', 'sportCode', 'levelOld', 'levelNew', 'totalScore'];
-  var missing = required.filter(function (f) { return !found[f]; });
+  var missing = cfg.required.filter(function (f) { return !found[f]; });
   if (missing.length) {
-    return { ok: false, message: 'หัวคอลัมน์ในแท็บ ' + CENTRAL_TAB + ' ไม่ครบ ขาด: ' + missing.join(', ') + ' — ยังไม่ได้ส่งข้อมูล' };
+    return { ok: false, message: cfg.tab + ': หัวคอลัมน์ไม่ครบ ขาด ' + missing.join(', ') + ' — ยังไม่ได้ส่ง' };
   }
 
   var rows = [];
@@ -131,7 +158,7 @@ function pushCentralScores_() {
     if (hasValue) rows.push(row);
   }
 
-  var syncId = 'cs-' + new Date().getTime();
+  var syncId = 'ms-' + new Date().getTime();
   var batches = Math.max(1, Math.ceil(rows.length / CENTRAL_BATCH_SIZE));
   var total = null;
   for (var b = 0; b < batches; b++) {
@@ -140,14 +167,14 @@ function pushCentralScores_() {
       method: 'post',
       contentType: 'application/json',
       headers: { 'x-api-key': secret },
-      payload: JSON.stringify({ tab: CENTRAL_TAB, syncId: syncId, rows: chunk, final: b === batches - 1 }),
+      payload: JSON.stringify({ tab: cfg.tab, syncId: syncId, rows: chunk, final: b === batches - 1 }),
       muteHttpExceptions: true,
     });
     if (res.getResponseCode() >= 300) {
       // ชุดสุดท้ายยังไม่ถูกส่ง = เว็บยังแสดงข้อมูลรอบก่อนหน้าครบถ้วนตามเดิม
       return {
         ok: false,
-        message: 'ส่งไม่สำเร็จที่ชุด ' + (b + 1) + '/' + batches + ' (HTTP ' + res.getResponseCode() + '): ' + res.getContentText().slice(0, 300) + '\nหน้าภาพรวมยังแสดงข้อมูลรอบก่อนหน้า',
+        message: cfg.tab + ': ส่งไม่สำเร็จที่ชุด ' + (b + 1) + '/' + batches + ' (HTTP ' + res.getResponseCode() + '): ' + res.getContentText().slice(0, 200),
       };
     }
     if (b === batches - 1) {
@@ -156,9 +183,9 @@ function pushCentralScores_() {
   }
 
   if (total !== null && total !== rows.length) {
-    return { ok: false, message: 'ส่งแล้วแต่จำนวนไม่ตรง: ชีตมี ' + rows.length + ' แถว เว็บรับได้ ' + total + ' แถว กรุณาส่งใหม่อีกครั้ง' };
+    return { ok: false, message: cfg.tab + ': จำนวนไม่ตรง ชีตมี ' + rows.length + ' แถว เว็บรับได้ ' + total + ' แถว กรุณาส่งใหม่' };
   }
-  return { ok: true, message: 'ส่ง Central_Scores ไปหน้าภาพรวมแล้ว ' + rows.length + ' แถว' };
+  return { ok: true, message: cfg.tab + ': ส่งแล้ว ' + rows.length + ' แถว' };
 }
 
 function notify_(message) {

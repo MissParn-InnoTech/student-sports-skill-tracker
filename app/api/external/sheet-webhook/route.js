@@ -4,6 +4,7 @@ import { withApiKeyFromEnv } from '@/lib/apiAuth';
 import { upsertStudentFromSheet, upsertSkillLogFromSheet, upsertOverallSkillLogFromGradeSheet } from '@/lib/dataAccess';
 import { upsertCourseLog } from '@/lib/courseLogs';
 import { receiveCentralScoresBatch } from '@/lib/centralScores';
+import { receiveMasterTabBatch, MASTER_TABS } from '@/lib/masterTabs';
 
 export const dynamic = 'force-dynamic';
 
@@ -102,5 +103,10 @@ export const POST = withApiKeyFromEnv('SHEET_SYNC_SECRET', withErrorHandling(asy
     const result = await receiveCentralScoresBatch({ syncId: body.syncId, rows: body.rows, final: body.final === true });
     return NextResponse.json(result);
   }
-  return NextResponse.json({ error: `ไม่รู้จักแท็บ "${tab}" (ต้องเป็น Student_DB, Skill_Logs, Data_Entry, Course_Entry หรือ Central_Scores)` }, { status: 400 });
+  if (MASTER_TABS.includes(tab)) {
+    // สำเนาแท็บ Student_Register / Course_Register ทั้งแท็บ (ส่งเป็นชุด ๆ) ใช้กับหน้า "รายงานผู้บริหาร"
+    const result = await receiveMasterTabBatch({ tab, syncId: body.syncId, rows: body.rows, final: body.final === true });
+    return NextResponse.json(result);
+  }
+  return NextResponse.json({ error: `ไม่รู้จักแท็บ "${tab}" (ต้องเป็น Student_DB, Skill_Logs, Data_Entry, Course_Entry, Central_Scores, Student_Register หรือ Course_Register)` }, { status: 400 });
 }));
