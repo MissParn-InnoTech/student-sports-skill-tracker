@@ -86,7 +86,7 @@ export default function CourseScoresPage() {
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 mb-4">
         <h1 className="text-lg font-bold text-slate-800">กรอกคะแนนคอร์สพิเศษ</h1>
         <p className="text-sm text-slate-500 mb-4">
-          นอกเวลา / Summer Course / October Course — รายชื่อมาจากต้นขั้ว (แท็บ Course_Register) ใน Google Sheet และแยกจากคะแนนภาคปกติ
+          AFTER SCHOOL / OCTOBER / SUMMER — รายชื่อมาจากต้นขั้ว (แท็บ Course_Register) ใน Google Sheet และแยกจากคะแนนภาคปกติ
         </p>
         <div className="flex flex-wrap items-end gap-3">
           <label className="text-xs font-semibold text-slate-500">
