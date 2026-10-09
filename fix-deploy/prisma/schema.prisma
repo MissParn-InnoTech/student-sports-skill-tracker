@@ -1,0 +1,125 @@
+// Student Sports Skill Tracker - Database Schema (PostgreSQL)
+// ---------------------------------------------------------------------------
+// แทนที่ Google Sheets เดิม 3 แท็บ (Student_DB, Skill_Logs, Audit_Log)
+// System_Config (กีฬา/ทักษะ/คำอธิบาย Level) ยังเก็บเป็น static config ใน
+// lib/sportsConfig.js เหมือนเดิม ไม่ทำเป็นตาราง เพราะแทบไม่เปลี่ยนบ่อย
+// และไม่ต้องพึ่ง DB round-trip ทุกครั้งที่โหลดหน้าแรก
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+model Student {
+  id                  String     @id // เช่น STU001
+  name                String
+  className           String     @map("class_name")
+  currentAcademicYear Int        @map("current_academic_year")
+  assignedSport       String?    @map("assigned_sport") // กีฬาที่กำหนดให้เล่นในปีการศึกษาปัจจุบัน ตั้งค่าตอน "ตั้งค่าปีการศึกษาใหม่" (หน้า Admin) ใช้เป็นค่า default ตอนกรอกคะแนนเท่านั้น ไม่ผูกพันตายตัว
+  status              String     @default("Active") // Active | Inactive | Graduated
+  createdAt           DateTime   @default(now()) @map("created_at")
+  updatedAt           DateTime   @updatedAt @map("updated_at")
+  logs                SkillLog[]
+
+  @@index([className])
+  @@index([status])
+  @@map("students")
+}
+
+model SkillLog {
+  id            Int      @id @default(autoincrement())
+  timestamp     DateTime @default(now())
+  academicYear  Int      @map("academic_year")
+  studentId     String   @map("student_id")
+  student       Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentName   String   @map("student_name")
+  selectedSport String   @map("selected_sport")
+  skillName     String   @map("skill_name")
+  finalLevel    Int      @map("final_level")
+  coachNotes    String?  @map("coach_notes")
+
+  // ตรวจสอบแล้วผ่าน /api/external/debug-duplicate-skill-logs (ใช้ raw SQL GROUP BY ... HAVING
+  // COUNT(*) > 1 บนฐานข้อมูลจริง): ไม่มีแถวซ้ำตามคีย์นี้อยู่เลย (duplicateGroupCount = 0) จึงปลอดภัย
+  // ที่จะเพิ่ม constraint นี้กลับเข้าไป — ป้องกันแถวซ้ำเกิดใหม่ตอนครูแก้ไขช่องเดิมซ้ำๆ บน Google Sheet
+  @@unique([studentId, academicYear, selectedSport, skillName], name: "studentId_academicYear_selectedSport_skillName")
+  @@index([studentId])
+  @@index([academicYear, selectedSport])
+  @@map("skill_logs")
+}
+
+model AuditLog {
+  id           Int      @id @default(autoincrement())
+  timestamp    DateTime @default(now())
+  action       String
+  actor        String
+  academicYear Int?     @map("academic_year")
+  sport        String?
+  studentCount Int?     @map("student_count")
+  details      String?
+
+  @@map("audit_log")
+}
+
+// ---------------------------------------------------------------------------
+// ตารางด้านล่างนี้ถูกสร้างและอ่าน/เขียนด้วย raw SQL (lib/courseLogs.js, lib/centralScores.js)
+// โค้ดไม่ได้เรียกผ่าน Prisma Client — แต่ "ต้อง" ประกาศไว้ที่นี่ให้ตรงกับตารางจริงทุกคอลัมน์
+// เพราะ build บน Vercel รัน `prisma db push` ซึ่งจะพยายาม "ลบ" ทุกตารางที่ไม่มีใน schema นี้
+// (ถ้าตารางมีข้อมูล build จะล้มด้วย data loss warning — ห้ามแก้ด้วย --accept-data-loss
+// เพราะจะลบคะแนนคอร์สพิเศษทิ้งจริง) ถ้าเพิ่มตาราง raw SQL ใหม่ ให้เพิ่ม model ที่นี่ด้วยเสมอ
+// ---------------------------------------------------------------------------
+model central_scores {
+  id          Int     @id @default(autoincrement())
+  sync_id     String
+  row_no      Int?
+  student_id  String?
+  prefix      String?
+  first_name  String?
+  last_name   String?
+  class_name  String?
+  sport_code  String?
+  level_old   String?
+  level_new   String?
+  total_score String?
+}
+
+model central_scores_sync {
+  sync_id      String   @id
+  row_count    Int
+  completed_at DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model course_skill_details {
+  id            Int      @id @default(autoincrement())
+  student_id    String
+  academic_year Int
+  sport_code    String
+  course_type   String
+  skill_name    String
+  final_level   Int
+  coach_notes   String?
+  actor         String?
+  updated_at    DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([student_id, academic_year, sport_code, course_type, skill_name])
+}
+
+model course_skill_logs {
+  id            Int      @id @default(autoincrement())
+  student_id    String
+  student_name  String?
+  class_name    String?
+  academic_year Int
+  sport_code    String
+  course_type   String
+  level_old     String?
+  level_new     String?
+  total_score   Float?
+  updated_at    DateTime @default(now()) @db.Timestamptz(6)
+
+  @@unique([student_id, academic_year, sport_code, course_type])
+}
