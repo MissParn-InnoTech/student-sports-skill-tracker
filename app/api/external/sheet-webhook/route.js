@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { withErrorHandling } from '@/lib/apiHelpers';
 import { withApiKeyFromEnv } from '@/lib/apiAuth';
 import { upsertStudentFromSheet, upsertSkillLogFromSheet, upsertOverallSkillLogFromGradeSheet } from '@/lib/dataAccess';
+import { upsertCourseLog } from '@/lib/courseLogs';
 
 export const dynamic = 'force-dynamic';
 
@@ -77,6 +78,22 @@ export const POST = withApiKeyFromEnv('SHEET_SYNC_SECRET', withErrorHandling(asy
   if (tab === 'Data_Entry') {
     const log = await upsertOverallSkillLogFromGradeSheet(normalizeGradeEntryRow(row || {}));
     return NextResponse.json({ ok: true, log });
+  }
+  if (tab === 'Course_Entry') {
+    // คอร์สพิเศษ (นอกเวลา / Summer Course / October Course) จาก Master_Sports_System
+    // รับได้ทั้ง row เดียว หรือ rows หลายแถว เก็บแยกตาราง course_skill_logs ไม่แตะคะแนนภาคปกติ
+    const list = Array.isArray(body.rows) ? body.rows : [row || {}];
+    let saved = 0;
+    const errors = [];
+    for (const r of list) {
+      try {
+        await upsertCourseLog(r || {});
+        saved++;
+      } catch (err) {
+        errors.push({ studentId: r?.studentId ?? null, error: err.message });
+      }
+    }
+    return NextResponse.json({ ok: errors.length === 0, saved, errors });
   }
   return NextResponse.json({ error: `ไม่รู้จักแท็บ "${tab}" (ต้องเป็น Student_DB, Skill_Logs หรือ Data_Entry)` }, { status: 400 });
 }));
