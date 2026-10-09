@@ -237,7 +237,7 @@ export default function DashboardPage({ params }) {
 
       {courseLogs.length > 0 && (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 mt-5">
-          <h2 className="font-semibold text-slate-700 mb-1">คอร์สพิเศษ (นอกเวลา / Summer / October)</h2>
+          <h2 className="font-semibold text-slate-700 mb-1">คอร์สพิเศษ (AFTER SCHOOL / OCTOBER / SUMMER)</h2>
           <p className="text-xs text-slate-400 mb-3">แยกจากผลประเมินภาคปกติ ช่องที่ครูยังไม่ได้กรอกจะเว้นว่างไว้</p>
           <div className="overflow-auto">
             <table className="min-w-full text-sm">
