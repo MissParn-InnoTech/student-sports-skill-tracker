@@ -110,7 +110,7 @@ export default function FixRunningPage() {
                 {g.movable ? (
                   <input type="checkbox" className="mt-1 h-4 w-4" checked={!!chosen[g.key]} onChange={(e) => setChosen((c) => ({ ...c, [g.key]: e.target.checked }))} />
                 ) : (
-                  <span className="mt-0.5 rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-500 whitespace-nowrap">ไม่แก้</span>
+                  <span className="mt-0.5 rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500 whitespace-nowrap">ไม่แก้</span>
                 )}
                 <span>
                   <span className="font-semibold text-slate-700">{g.label}</span>

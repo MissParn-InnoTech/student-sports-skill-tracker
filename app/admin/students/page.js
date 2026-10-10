@@ -25,10 +25,10 @@ const STATUS_STYLES = {
 };
 
 const BTN_PRIMARY =
-  'inline-flex items-center justify-center gap-1.5 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white shadow-sm transition ' +
+  'inline-flex items-center justify-center gap-1.5 rounded-lg bg-brand px-4 py-2.5 sm:py-2 text-sm font-semibold text-white shadow-sm transition ' +
   'hover:bg-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50';
 const BTN_SECONDARY =
-  'inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-semibold text-slate-700 shadow-sm transition ' +
+  'inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 sm:py-2 text-sm font-semibold text-slate-700 shadow-sm transition ' +
   'hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50';
 const CARD = 'rounded-2xl border border-slate-200 bg-white shadow-sm';
 
@@ -66,14 +66,14 @@ function SectionHeader({ step, icon: Icon, title, description }) {
 
 function StatCard({ icon: Icon, value, label, sub }) {
   return (
-    <div className={CARD + ' flex items-center gap-3 p-4'}>
+    <div className={CARD + ' flex items-center gap-2.5 sm:gap-3 p-3.5 sm:p-4'}>
       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">
         <Icon className="h-5 w-5" strokeWidth={2.25} />
       </span>
       <div className="min-w-0">
         <div className="text-xl font-bold leading-tight tabular-nums text-slate-800">{value}</div>
         <div className="truncate text-xs text-slate-500">{label}</div>
-        {sub ? <div className="truncate text-[11px] text-slate-400">{sub}</div> : null}
+        {sub ? <div className="truncate text-xs text-slate-400">{sub}</div> : null}
       </div>
     </div>
   );
@@ -97,7 +97,7 @@ function PagerButton({ onClick, disabled, label, children }) {
       disabled={disabled}
       aria-label={label}
       title={label}
-      className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+      className="flex h-10 w-10 sm:h-8 sm:w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
     >
       {children}
     </button>
@@ -446,7 +446,7 @@ export default function ManageStudentsPage() {
         <div
           role="status"
           className={
-            'fixed right-4 top-24 z-50 flex max-w-sm items-start gap-2 rounded-xl px-4 py-3 text-sm font-medium text-white shadow-lg ' +
+            'fixed inset-x-4 sm:left-auto sm:right-4 top-28 sm:top-24 z-50 flex sm:max-w-sm items-start gap-2 rounded-xl px-4 py-3 text-sm font-medium text-white shadow-lg ' +
             (toast.kind === 'err' ? 'bg-red-600' : 'bg-emerald-600')
           }
         >
@@ -483,7 +483,7 @@ export default function ManageStudentsPage() {
       </div>
 
       {/* สรุปภาพรวม */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
         <StatCard icon={Users} value={loading ? '—' : nf.format(stats.total)} label="นักเรียนทั้งหมด" />
         <StatCard
           icon={UserCheck}
@@ -688,6 +688,7 @@ export default function ManageStudentsPage() {
           </div>
         )}
 
+        <p className="sm:hidden px-4 pb-2 text-xs text-slate-400">เลื่อนตารางไปทางขวาเพื่อดูคอลัมน์ทั้งหมด →</p>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[760px] text-sm">
             <thead>
@@ -819,7 +820,7 @@ export default function ManageStudentsPage() {
                           <button
                             type="button"
                             onClick={() => startEdit(s)}
-                            className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-brand/10 hover:text-brand"
+                            className="inline-flex items-center gap-1 rounded-lg px-2.5 py-2 sm:px-2 sm:py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-brand/10 hover:text-brand"
                           >
                             <Pencil className="h-3.5 w-3.5" />
                             แก้ไข
@@ -827,7 +828,7 @@ export default function ManageStudentsPage() {
                           <button
                             type="button"
                             onClick={() => handleDelete(s)}
-                            className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-semibold text-slate-400 transition hover:bg-red-50 hover:text-red-600"
+                            className="inline-flex items-center gap-1 rounded-lg px-2.5 py-2 sm:px-2 sm:py-1.5 text-xs font-semibold text-slate-400 transition hover:bg-red-50 hover:text-red-600"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                             ลบ

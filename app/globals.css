@@ -85,6 +85,70 @@ body {
   transform: translateY(-1px);
 }
 
+/* ===================== มือถือ (จอแคบกว่า 640px) =====================
+   ปรับขนาดตัวอักษร/ระยะกดให้พอดีมือ โดยไม่กระทบหน้าจอคอมพิวเตอร์และการพิมพ์ */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+body {
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
+}
+
+/* แถบเลื่อนแนวนอน (เมนู/การ์ดกีฬา) ไม่โชว์ scrollbar ให้ดูเหมือนแอป */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* เผื่อพื้นที่ขอบล่างของ iPhone (แถบ home) ให้ปุ่ม/แถบที่ติดขอบล่าง */
+.pb-safe {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+@media screen and (max-width: 639px) {
+  .no-scrollbar-mobile {
+    scrollbar-width: none;
+  }
+  .no-scrollbar-mobile::-webkit-scrollbar {
+    display: none;
+  }
+  :root {
+    /* ตัวอักษรเล็กสุดบนมือถือไม่ต่ำกว่า 13px (เดิม 11–12px อ่านยาก) */
+    --text-xs: 0.8125rem;
+    --text-xs--line-height: 1.5;
+    --text-sm: 0.9375rem;
+    --text-sm--line-height: 1.55;
+  }
+  body {
+    font-size: 16px;
+    line-height: 1.55;
+  }
+  /* ช่องกรอก ≥16px กัน iOS ซูมหน้าจอเองตอนแตะ และสูงพอให้นิ้วกดง่าย */
+  input:not([type='checkbox']):not([type='radio']),
+  select,
+  textarea {
+    font-size: 16px !important;
+    min-height: 44px;
+  }
+  input[type='checkbox'],
+  input[type='radio'] {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+  button,
+  a[role='button'] {
+    touch-action: manipulation;
+  }
+  table {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
 /* ===================== พิมพ์ Report Card / Class Report เป็น PDF (A4) ===================== */
 #printReport {
   display: none;

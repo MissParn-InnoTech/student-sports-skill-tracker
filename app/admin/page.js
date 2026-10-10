@@ -30,28 +30,28 @@ function formatDateTimeTh(ts) {
 
 const sportLabel = (s) => (s.name ? s.name.replace(/\s*\(.*\)$/, '') + ' (' + s.code + ')' : s.code);
 
-function KpiCard({ icon: Icon, value, label, sub }) {
+function KpiCard({ icon: Icon, value, label, sub, className = '' }) {
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 break-inside-avoid">
+    <div className={'bg-white rounded-2xl border border-slate-200 shadow-sm p-3.5 sm:p-4 break-inside-avoid ' + className}>
       <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand/10 text-brand mb-2">
         <Icon className="h-[18px] w-[18px]" strokeWidth={2.25} />
       </div>
       <div className="text-2xl font-bold text-slate-800 leading-tight tabular-nums">{value}</div>
-      <div className="text-xs text-slate-500 mt-0.5">{label}</div>
-      {sub ? <div className="text-[11px] text-slate-400 mt-1 leading-snug">{sub}</div> : null}
+      <div className="text-[13px] sm:text-xs font-medium sm:font-normal text-slate-600 sm:text-slate-500 mt-0.5 leading-snug">{label}</div>
+      {sub ? <div className="text-xs text-slate-400 mt-1 leading-snug">{sub}</div> : null}
     </div>
   );
 }
 
 function Card({ children, className = '' }) {
-  return <section className={'bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 mb-5 break-inside-avoid ' + className}>{children}</section>;
+  return <section className={'bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 mb-4 sm:mb-5 break-inside-avoid ' + className}>{children}</section>;
 }
 
 function SectionTitle({ icon: Icon, children, note }) {
   return (
     <div className="mb-3">
-      <h2 className="flex items-center gap-2 font-semibold text-slate-700">
-        <Icon className="h-4 w-4 text-slate-400" strokeWidth={2.25} />
+      <h2 className="flex items-center gap-2 font-semibold text-slate-700 leading-snug">
+        <Icon className="h-4 w-4 shrink-0 text-slate-400" strokeWidth={2.25} />
         {children}
       </h2>
       {note ? <p className="text-xs text-slate-400 mt-1 leading-relaxed">{note}</p> : null}
@@ -67,6 +67,8 @@ function ProgressBar({ pct, tone = 'bg-brand' }) {
     </div>
   );
 }
+
+const SOURCE_TABS = ['Student_Register', 'Central_Scores', 'Course_Register'];
 
 const TONE = {
   info: 'border-slate-200 bg-white',
@@ -135,26 +137,44 @@ export default function ExecutiveReportPage() {
   const a = ex.assessment;
 
   const header = (
-    <div className="flex flex-wrap items-end justify-between gap-3 mb-4">
-      <div>
-        <h1 className="text-lg font-semibold text-slate-800">รายงานผู้บริหาร: ภาพรวมทักษะกีฬานักเรียน</h1>
-        <p className="text-xs text-slate-500 mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+    <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-end sm:justify-between gap-3 mb-4">
+      <div className="min-w-0">
+        <h1 className="text-xl sm:text-lg font-semibold text-slate-800 leading-snug">
+          รายงานผู้บริหาร<span className="hidden sm:inline">: </span>
+          <span className="block sm:inline text-base sm:text-lg font-medium sm:font-semibold text-slate-600 sm:text-slate-800">ภาพรวมทักษะกีฬานักเรียน</span>
+        </h1>
+        {/* จอใหญ่: บรรทัดเดียว · มือถือ: กล่องสรุปเวลาซิงก์แยกบรรทัดต่อแท็บ อ่านง่ายกว่า */}
+        <p className="hidden sm:flex text-xs text-slate-500 mt-0.5 flex-wrap items-center gap-x-1.5 gap-y-0.5">
           <Database className="h-3.5 w-3.5 text-slate-400" />
           แหล่งข้อมูล: Google Sheet Master_Sports_System
-          {['Student_Register', 'Central_Scores', 'Course_Register'].map((tab) => (
+          {SOURCE_TABS.map((tab) => (
             <span key={tab} className="whitespace-nowrap">
               <span className="text-slate-300 mr-1.5">|</span>
               <span className="font-semibold text-slate-600">{tab}</span> {formatDateTimeTh(src[tab]?.lastSyncedTs)}
             </span>
           ))}
         </p>
+        <div className="sm:hidden mt-2.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
+            <Database className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+            ข้อมูลจาก Google Sheet · ซิงก์ล่าสุด
+          </div>
+          <dl className="mt-1.5 space-y-1">
+            {SOURCE_TABS.map((tab) => (
+              <div key={tab} className="flex items-baseline justify-between gap-3 text-xs">
+                <dt className="font-semibold text-slate-700">{tab}</dt>
+                <dd className="text-right tabular-nums text-slate-500">{formatDateTimeTh(src[tab]?.lastSyncedTs)}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
       </div>
-      <div className="no-print flex items-center gap-2">
-        <button onClick={load} disabled={loading} className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-2 text-[13px] font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-60">
+      <div className="no-print grid grid-cols-2 gap-2 sm:flex sm:items-center">
+        <button onClick={load} disabled={loading} className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-slate-200 bg-white px-3.5 py-2.5 sm:py-2 text-sm sm:text-[13px] font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-60">
           <RefreshCw className={'h-4 w-4 ' + (loading ? 'animate-spin' : '')} />
           โหลดใหม่
         </button>
-        <button onClick={() => window.print()} className="inline-flex items-center gap-1.5 rounded-full bg-brand px-3.5 py-2 text-[13px] font-medium text-white hover:bg-brand-dark">
+        <button onClick={() => window.print()} className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-brand px-3.5 py-2.5 sm:py-2 text-sm sm:text-[13px] font-medium text-white hover:bg-brand-dark">
           <Printer className="h-4 w-4" />
           พิมพ์รายงาน
         </button>
@@ -253,8 +273,8 @@ export default function ExecutiveReportPage() {
     <div>
       {header}
 
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5">
-        <KpiCard icon={Users} value={fmt(t.students)} label="นักเรียนทั้งหมด" sub={'ประถม ' + fmt(t.primary) + ' · มัธยมต้น ' + fmt(t.secondary)} />
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-2.5 sm:gap-3 mb-4 sm:mb-5">
+        <KpiCard className="col-span-2 md:col-span-1" icon={Users} value={fmt(t.students)} label="นักเรียนทั้งหมด" sub={'ประถม ' + fmt(t.primary) + ' · มัธยมต้น ' + fmt(t.secondary)} />
         <KpiCard icon={School} value={fmt(t.classCount)} label="ห้องเรียน" sub={fmt(t.gradeCount) + ' ระดับชั้น'} />
         <KpiCard icon={Medal} value={fmt(t.sportCount)} label="วิชากีฬา" sub={a.centralSynced ? 'อยู่ในระบบลงคะแนน ' + fmt(t.sportCount - a.sportsNotInCentral.length) + ' วิชา' : null} />
         <KpiCard icon={ClipboardCheck} value={a.centralSynced ? fmtPct(a.assessedPctOfCentral) : '—'} label="ความคืบหน้าการประเมิน" sub={a.centralSynced ? fmt(a.assessed) + ' จาก ' + fmt(a.centralRecords) + ' รายการ' : 'ยังไม่ซิงก์ Central_Scores'} />
@@ -266,8 +286,8 @@ export default function ExecutiveReportPage() {
         <div className="grid md:grid-cols-2 gap-2.5">
           {ex.insights.map((it, i) => (
             <div key={i} className={'rounded-xl border px-3.5 py-2.5 ' + (TONE[it.tone] || TONE.info)}>
-              <div className="text-[13px] font-semibold text-slate-700">{it.title}</div>
-              <div className="text-[13px] text-slate-600 leading-relaxed mt-0.5">{it.text}</div>
+              <div className="text-sm sm:text-[13px] font-semibold text-slate-700">{it.title}</div>
+              <div className="text-sm sm:text-[13px] text-slate-600 leading-relaxed mt-0.5">{it.text}</div>
             </div>
           ))}
         </div>
@@ -315,25 +335,25 @@ export default function ExecutiveReportPage() {
         <SectionTitle icon={Grid3x3} note="จำนวนนักเรียนในแต่ละระดับชั้นและวิชา · สีเข้ม = จำนวนมาก">
           ตารางไขว้ระดับชั้น × วิชากีฬา
         </SectionTitle>
-        <div className="overflow-auto">
+        <div className="overflow-auto -mx-4 px-4 sm:mx-0 sm:px-0">
           <table className="min-w-full text-xs border-separate border-spacing-0.5">
             <thead>
               <tr className="text-slate-400 font-semibold">
-                <th className="py-1.5 pr-2 text-left">ระดับชั้น</th>
-                {ex.sportCodes.map((c) => <th key={c} className="py-1.5 px-1 text-center min-w-[40px]">{c}</th>)}
+                <th className="sticky left-0 z-10 bg-white py-1.5 pr-2 text-left whitespace-nowrap">ระดับชั้น</th>
+                {ex.sportCodes.map((c) => <th key={c} className="py-1.5 px-1 text-center min-w-[44px] sm:min-w-[40px]">{c}</th>)}
                 <th className="py-1.5 pl-2 text-right">รวม</th>
               </tr>
             </thead>
             <tbody>
               {ex.byGrade.map((g) => (
                 <tr key={g.grade}>
-                  <td className="py-1.5 pr-2 font-semibold text-slate-700 whitespace-nowrap">{g.grade}</td>
+                  <td className="sticky left-0 z-10 bg-white py-1.5 pr-2 font-semibold text-slate-700 whitespace-nowrap">{g.grade}</td>
                   {g.bySport.map((n, i) => {
                     const k = n / heatMax;
                     return (
                       <td
                         key={i}
-                        className="py-1.5 px-1 text-center tabular-nums rounded-md"
+                        className="py-2 sm:py-1.5 px-1 text-center tabular-nums rounded-md"
                         style={{ backgroundColor: n ? 'rgba(200,30,58,' + (0.08 + k * 0.82).toFixed(2) + ')' : '#f8fafc', color: k > 0.5 ? '#fff' : n ? '#3a0e18' : '#cbd5e1', printColorAdjust: 'exact', WebkitPrintColorAdjust: 'exact' }}
                       >
                         {n ? fmt(n) : '·'}
@@ -346,7 +366,7 @@ export default function ExecutiveReportPage() {
             </tbody>
             <tfoot>
               <tr className="font-semibold text-slate-700">
-                <td className="py-1.5 pr-2">รวม</td>
+                <td className="sticky left-0 z-10 bg-white py-1.5 pr-2">รวม</td>
                 {sports.map((s) => <td key={s.code} className="py-1.5 px-1 text-center tabular-nums">{fmt(s.count)}</td>)}
                 <td className="py-1.5 pl-2 text-right tabular-nums">{fmt(t.students)}</td>
               </tr>
@@ -359,7 +379,52 @@ export default function ExecutiveReportPage() {
         <SectionTitle icon={Target} note="นักเรียนตามทะเบียน เทียบกับรายการในแท็บ Central_Scores · ประเมินแล้ว = กรอก LV.ใหม่ แล้ว">
           ความคืบหน้าการประเมินรายวิชา
         </SectionTitle>
-        <div className="overflow-auto">
+        {/* มือถือ: การ์ดต่อวิชา (ตาราง 7 คอลัมน์อ่านบนจอแคบไม่ได้) · จอใหญ่/พิมพ์: ตารางเดิม */}
+        <ul className="sm:hidden print:hidden divide-y divide-slate-100 -mx-4 border-y border-slate-100">
+          {sports.map((s) => (
+            <li key={s.code} className="px-4 py-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <span className="inline-block rounded-md bg-slate-100 px-1.5 py-0.5 text-xs font-semibold text-slate-500 mr-1.5 align-middle">{s.code}</span>
+                  <span className="text-[15px] font-semibold text-slate-800 align-middle">{s.name ? s.name.replace(/\s*\(.*\)$/, '') : 'ยังไม่มีชื่อ'}</span>
+                </div>
+                <div className="shrink-0 text-right leading-tight">
+                  <div className="text-base font-bold tabular-nums text-slate-800">{fmt(s.count)}</div>
+                  <div className="text-xs text-slate-500">คน · {fmtPct(s.sharePct)}</div>
+                </div>
+              </div>
+              {s.inCentral ? (
+                <>
+                  <div className="mt-2 flex items-center gap-2.5">
+                    <ProgressBar pct={s.assessedPct} />
+                    <span className="w-14 shrink-0 text-right text-sm font-semibold tabular-nums text-slate-700">{fmtPct(s.assessedPct)}</span>
+                  </div>
+                  <div className="mt-1 text-xs text-slate-500">
+                    ประเมินแล้ว {fmt(s.assessed)} จาก {fmt(s.centralRecords)} · พ้นระดับ PL {fmtPct(s.beyondPLPct)}
+                  </div>
+                </>
+              ) : (
+                <div className="mt-1.5 text-xs text-amber-600">ยังไม่มีในระบบลงคะแนน · พ้นระดับ PL {fmtPct(s.beyondPLPct)}</div>
+              )}
+            </li>
+          ))}
+          <li className="bg-slate-50 px-4 py-3">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-[15px] font-semibold text-slate-800">รวมทั้งหมด</span>
+              <span className="text-base font-bold tabular-nums text-slate-800">{fmt(t.students)} <span className="text-xs font-normal text-slate-500">คน</span></span>
+            </div>
+            {a.centralSynced ? (
+              <>
+                <div className="mt-2 flex items-center gap-2.5">
+                  <ProgressBar pct={a.assessedPctOfCentral} />
+                  <span className="w-14 shrink-0 text-right text-sm font-semibold tabular-nums text-slate-700">{fmtPct(a.assessedPctOfCentral)}</span>
+                </div>
+                <div className="mt-1 text-xs text-slate-500">ประเมินแล้ว {fmt(a.assessed)} จาก {fmt(a.centralRecords)} รายการ</div>
+              </>
+            ) : null}
+          </li>
+        </ul>
+        <div className="hidden sm:block print:block overflow-auto">
           <table className="min-w-full text-sm">
             <thead>
               <tr className="text-xs font-semibold text-slate-400 border-b border-slate-200">
@@ -376,7 +441,7 @@ export default function ExecutiveReportPage() {
               {sports.map((s) => (
                 <tr key={s.code} className="border-b border-slate-100">
                   <td className="py-2 pr-2 text-slate-700 whitespace-nowrap">
-                    <span className="inline-block min-w-[38px] rounded-md bg-slate-100 px-1.5 py-0.5 text-center text-[11px] font-semibold text-slate-500 mr-2">{s.code}</span>
+                    <span className="inline-block min-w-[38px] rounded-md bg-slate-100 px-1.5 py-0.5 text-center text-xs font-semibold text-slate-500 mr-2">{s.code}</span>
                     {s.name || <span className="text-slate-400">ยังไม่มีชื่อในแท็บ &ldquo;รหัส&rdquo;</span>}
                   </td>
                   <td className={td + ' font-semibold text-slate-700'}>{fmt(s.count)}</td>
@@ -436,9 +501,9 @@ export default function ExecutiveReportPage() {
             <div className="space-y-2">
               {ex.course.byType.map((c) => (
                 <div key={c.type} className="flex items-center gap-3">
-                  <div className="w-32 text-sm text-slate-700">{c.type}</div>
+                  <div className="w-28 sm:w-32 shrink-0 text-sm text-slate-700">{c.type}</div>
                   <ProgressBar pct={(c.count / ex.course.enrolled) * 100} tone="bg-gold" />
-                  <div className="w-16 text-right text-sm tabular-nums font-semibold text-slate-700">{fmt(c.count)} คน</div>
+                  <div className="w-16 shrink-0 text-right text-sm tabular-nums font-semibold text-slate-700">{fmt(c.count)} คน</div>
                 </div>
               ))}
               <p className="text-xs text-slate-500 pt-1">
@@ -454,8 +519,8 @@ export default function ExecutiveReportPage() {
             คุณภาพข้อมูล
           </SectionTitle>
           {ex.dataQuality.length === 0 ? (
-            <div className="flex items-center gap-2 text-sm text-emerald-700">
-              <CheckCircle2 className="h-4 w-4" />
+            <div className="flex items-start sm:items-center gap-2 text-sm text-emerald-700">
+              <CheckCircle2 className="h-4 w-4 shrink-0" />
               ไม่พบปัญหา: ทุกแถวมีรหัสประจำตัว ชั้น/ห้อง รหัสวิชา และระดับที่ถูกต้อง
             </div>
           ) : (
@@ -478,7 +543,7 @@ export default function ExecutiveReportPage() {
         </Card>
       </div>
 
-      <p className="text-[11px] text-slate-400 leading-relaxed">
+      <p className="text-xs text-slate-400 leading-relaxed">
         ตัวเลขทั้งหมดคำนวณจากข้อมูลที่ส่งมาจาก Google Sheet ณ เวลาซิงก์ล่าสุดของแต่ละแท็บ หากแก้ไขชีตหลังจากนั้น
         ให้ส่งข้อมูลใหม่จากเมนู &ldquo;📊 ภาพรวมเว็บ&rdquo; ในชีตก่อน · เพศ: ชาย {fmt(t.male)} คน ({fmtPct(t.malePct)}) หญิง {fmt(t.female)} คน ({fmtPct(t.femalePct)})
       </p>

@@ -145,7 +145,7 @@ export default function ClassReportPage() {
           <button
             onClick={loadReport}
             disabled={busy}
-            className="col-span-2 md:col-span-1 inline-flex items-center justify-center gap-1.5 bg-brand hover:bg-brand-dark disabled:opacity-50 text-white font-semibold rounded-lg px-4 py-2 text-sm transition"
+            className="col-span-2 md:col-span-1 inline-flex items-center justify-center gap-1.5 bg-brand hover:bg-brand-dark disabled:opacity-50 text-white font-semibold rounded-lg px-4 py-3 sm:py-2 text-base sm:text-sm transition"
           >
             <BarChart3 className="h-4 w-4" strokeWidth={2.25} />
             ดูรายงาน
@@ -157,20 +157,20 @@ export default function ClassReportPage() {
 
       {report && (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-            <div className="text-sm text-slate-600">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-3 mb-4">
+            <div className="text-sm text-slate-600 leading-relaxed">
               ประเมินแล้ว <b>{report.evaluatedCount}</b> / {report.totalCount} คน &nbsp;|&nbsp; ค่าเฉลี่ยห้อง{' '}
               <b>{report.classAverage.toFixed(1)} / 6</b>
             </div>
             <button
               onClick={printClassReport}
-              className="inline-flex items-center gap-1.5 bg-slate-700 hover:bg-slate-800 text-white font-semibold rounded-lg px-4 py-2 text-sm transition"
+              className="inline-flex items-center justify-center gap-1.5 bg-slate-700 hover:bg-slate-800 text-white font-semibold rounded-lg px-4 py-2 text-sm transition"
             >
               <Printer className="h-4 w-4" strokeWidth={2.25} />
               พิมพ์ PDF
             </button>
           </div>
-          <div className="overflow-auto">
+          <div className="overflow-auto -mx-4 px-4 sm:mx-0 sm:px-0">
             <table className="min-w-full text-sm">
               <thead>
                 <tr className="text-left text-xs font-semibold text-slate-400 border-b border-slate-200">
@@ -184,7 +184,7 @@ export default function ClassReportPage() {
                   ) : (
                     <>
                       {report.skills.map((s) => (
-                        <th key={s} className="py-2 pr-3 text-center">
+                        <th key={s} className="py-2 pr-3 text-center whitespace-nowrap">
                           {s}
                         </th>
                       ))}
@@ -197,7 +197,7 @@ export default function ClassReportPage() {
                 {report.rows.map((r, i) => (
                   <tr key={r.studentId} className="border-b border-slate-100 last:border-0">
                     <td className="py-2 pr-3 text-slate-400">{i + 1}</td>
-                    <td className="py-2 pr-3 font-medium">{r.studentName}</td>
+                    <td className="py-2.5 sm:py-2 pr-3 font-medium min-w-[9rem]">{r.studentName}</td>
                     {isAllSports ? (
                       <>
                         <td className="py-2 pr-3">{r.sport || '-'}</td>

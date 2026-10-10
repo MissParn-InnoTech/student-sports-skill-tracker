@@ -10,6 +10,13 @@ const mitr = Mitr({
   display: 'swap',
 });
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  themeColor: '#8f1227',
+};
+
 export const metadata = {
   title: 'Student Sports Skill Tracker',
   description: 'ระบบติดตามทักษะกีฬาของนักเรียน',
@@ -20,7 +27,7 @@ export default function RootLayout({ children }) {
     <html lang="th" className={mitr.variable}>
       <body className="bg-paper text-ink text-[15px] antialiased">
         <Header />
-        <main className="max-w-7xl mx-auto px-3 sm:px-6 py-5 pb-16">
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-5 pb-24 sm:pb-16">
           <GuideBar />
           {children}
         </main>

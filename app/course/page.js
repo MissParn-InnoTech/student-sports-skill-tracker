@@ -85,13 +85,13 @@ export default function CourseScoresPage() {
     <div>
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 mb-4">
         <h1 className="text-lg font-bold text-slate-800">กรอกคะแนนคอร์สพิเศษ</h1>
-        <p className="text-sm text-slate-500 mb-4">
+        <p className="text-sm text-slate-500 mt-1 mb-4 leading-relaxed">
           AFTER SCHOOL / OCTOBER / SUMMER — รายชื่อมาจากต้นขั้ว (แท็บ Course_Register) ใน Google Sheet และแยกจากคะแนนภาคปกติ
         </p>
-        <div className="flex flex-wrap items-end gap-3">
+        <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-end">
           <label className="text-xs font-semibold text-slate-500">
             ปีการศึกษา
-            <select className={selectCls + ' block mt-1'} value={year} onChange={(e) => changeFilter({ year: e.target.value })}>
+            <select className={selectCls + ' block mt-1 w-full sm:w-auto'} value={year} onChange={(e) => changeFilter({ year: e.target.value })}>
               <option value="">ทุกปี</option>
               {(filters?.years || []).map((y) => (
                 <option key={y} value={y}>{y}</option>
@@ -99,27 +99,27 @@ export default function CourseScoresPage() {
             </select>
           </label>
           <label className="text-xs font-semibold text-slate-500">
-            ประเภทคอร์ส
-            <select className={selectCls + ' block mt-1'} value={type} onChange={(e) => changeFilter({ type: e.target.value })}>
-              <option value="">ทุกประเภท</option>
-              {(filters?.courseTypes || []).map((t) => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
-          </label>
-          <label className="text-xs font-semibold text-slate-500">
             รหัสวิชา
-            <select className={selectCls + ' block mt-1'} value={sport} onChange={(e) => changeFilter({ sport: e.target.value })}>
+            <select className={selectCls + ' block mt-1 w-full sm:w-auto'} value={sport} onChange={(e) => changeFilter({ sport: e.target.value })}>
               <option value="">ทุกกีฬา</option>
               {(filters?.sportCodes || []).map((s) => (
                 <option key={s} value={s}>{s}</option>
               ))}
             </select>
           </label>
+          <label className="col-span-2 text-xs font-semibold text-slate-500 ">
+            ประเภทคอร์ส
+            <select className={selectCls + ' block mt-1 w-full sm:w-auto'} value={type} onChange={(e) => changeFilter({ type: e.target.value })}>
+              <option value="">ทุกประเภท</option>
+              {(filters?.courseTypes || []).map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          </label>
           <button
             onClick={save}
             disabled={busy || changedIds.length === 0}
-            className="inline-flex items-center gap-1.5 bg-brand hover:bg-brand-dark disabled:opacity-40 text-white font-semibold rounded-lg px-4 py-2 text-sm transition ml-auto"
+            className="hidden sm:inline-flex items-center gap-1.5 bg-brand hover:bg-brand-dark disabled:opacity-40 text-white font-semibold rounded-lg px-4 py-2 text-sm transition ml-auto"
           >
             <Save className="h-4 w-4" strokeWidth={2.25} />
             บันทึก{changedIds.length ? ' (' + changedIds.length + ')' : ''}
@@ -142,7 +142,55 @@ export default function CourseScoresPage() {
       ) : (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
           <p className="text-xs text-slate-400 mb-3">{rows.length} รายการ</p>
-          <div className="overflow-auto">
+          {/* มือถือ: การ์ดต่อรายการ กรอก LV.ใหม่/คะแนนได้เต็มความกว้างจอ */}
+          <ul className="sm:hidden -mx-4 divide-y divide-slate-100 border-t border-slate-100">
+            {rows.map((r) => (
+              <li key={r.id} className={'px-4 py-3.5 ' + (edits[r.id] ? 'bg-amber-50/70' : '')}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="text-base font-semibold leading-snug text-slate-800">{r.studentName || '-'}</div>
+                    <div className="mt-0.5 text-xs text-slate-500">
+                      <Link href={'/dashboard/' + encodeURIComponent(r.studentId)} className="font-medium text-brand">{r.studentId}</Link>
+                      {' · '}{r.className || '-'} · ปี {r.academicYear}
+                    </div>
+                  </div>
+                  <span className="shrink-0 rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">{r.sportCode}</span>
+                </div>
+                <div className="mt-1.5 text-xs text-slate-500">
+                  {r.courseType} · LV.เดิม <b className="text-slate-700">{r.levelOld || '-'}</b>
+                </div>
+                <div className="mt-2.5 grid grid-cols-2 gap-2.5">
+                  <label className="text-xs font-semibold text-slate-500">
+                    LV.ใหม่
+                    <select
+                      className={selectCls + ' mt-1 block w-full'}
+                      value={valueOf(r, 'levelNew')}
+                      onChange={(e) => setField(r, 'levelNew', e.target.value)}
+                    >
+                      <option value="">—</option>
+                      {LEVELS.map((lv) => (
+                        <option key={lv} value={lv}>{lv}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="text-xs font-semibold text-slate-500">
+                    คะแนนรวม (100)
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      min="0"
+                      max="100"
+                      step="any"
+                      className={selectCls + ' mt-1 block w-full'}
+                      value={valueOf(r, 'totalScore')}
+                      onChange={(e) => setField(r, 'totalScore', e.target.value)}
+                    />
+                  </label>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <div className="hidden sm:block overflow-auto">
             <table className="min-w-full text-sm">
               <thead>
                 <tr className="text-left text-xs font-semibold text-slate-400 border-b border-slate-200">
@@ -199,6 +247,22 @@ export default function CourseScoresPage() {
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+      {/* มือถือ: ปุ่มบันทึกติดขอบล่าง กดได้ทุกเมื่อโดยไม่ต้องเลื่อนกลับขึ้นไปด้านบน */}
+      {rows.length > 0 && (
+        <div className="sm:hidden fixed bottom-0 inset-x-0 z-30 flex items-center gap-3 border-t border-black/5 bg-white/95 px-4 pt-3 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,.08)] backdrop-blur">
+          <div className="min-w-0 flex-1 text-sm leading-tight text-slate-600">
+            {changedIds.length ? <>แก้ไขแล้ว <b className="text-slate-800">{changedIds.length}</b> รายการ</> : 'ยังไม่มีการแก้ไข'}
+          </div>
+          <button
+            onClick={save}
+            disabled={busy || changedIds.length === 0}
+            className="btn-primary shrink-0 px-6 py-3 text-base"
+          >
+            <Save className="h-4 w-4" strokeWidth={2.25} />
+            บันทึก
+          </button>
         </div>
       )}
     </div>

@@ -119,14 +119,14 @@ export default function DashboardPage({ params }) {
 
   return (
     <div>
-      <Link href="/" className="inline-flex items-center gap-1 text-sm text-brand hover:underline">
+      <Link href="/" className="inline-flex items-center gap-1 py-1 text-sm font-medium text-brand hover:underline">
         <ArrowLeft className="h-3.5 w-3.5" />
         กลับหน้ากรอกคะแนน
       </Link>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 my-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-lg font-bold text-slate-800">{student.name}</h1>
+          <h1 className="text-xl sm:text-lg font-bold text-slate-800 leading-snug">{student.name}</h1>
           <p className="text-sm text-slate-500">
             รหัส {student.id} · ชั้นเรียน {student.className} · สถานะ {student.status}
           </p>
@@ -134,7 +134,7 @@ export default function DashboardPage({ params }) {
         {latest && (
           <button
             onClick={printReportCard}
-            className="inline-flex items-center gap-1.5 bg-brand hover:bg-brand-dark text-white font-semibold rounded-lg px-4 py-2 text-sm transition"
+            className="inline-flex w-full sm:w-auto items-center justify-center gap-1.5 bg-brand hover:bg-brand-dark text-white font-semibold rounded-lg px-4 py-3 sm:py-2 text-sm transition"
           >
             <Printer className="h-4 w-4" strokeWidth={2.25} />
             พิมพ์ Report Card (PDF)
@@ -174,10 +174,10 @@ export default function DashboardPage({ params }) {
           <p className="text-xs text-slate-400 mb-3">
             ไล่ตามระดับชั้น {gradeTimeline[0].gradeLabel}–{gradeTimeline[gradeTimeline.length - 1].gradeLabel} ปีไหนไม่มีข้อมูลการประเมินจะเว้นว่างไว้
           </p>
-          <div className="overflow-auto">
+          <div className="overflow-auto -mx-4 px-4 sm:mx-0 sm:px-0">
             <table className="min-w-full text-sm">
               <thead>
-                <tr className="text-left text-xs font-semibold text-slate-400 border-b border-slate-200">
+                <tr className="text-left text-xs font-semibold text-slate-400 border-b border-slate-200 whitespace-nowrap">
                   <th className="py-2 pr-3">ระดับชั้น</th>
                   <th className="py-2 pr-3">ปีการศึกษา</th>
                   <th className="py-2 pr-3">กีฬา</th>
@@ -206,10 +206,10 @@ export default function DashboardPage({ params }) {
       ) : (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
           <h2 className="font-semibold text-slate-700 mb-3">ประวัติการประเมินทั้งหมด</h2>
-          <div className="overflow-auto">
+          <div className="overflow-auto -mx-4 px-4 sm:mx-0 sm:px-0">
             <table className="min-w-full text-sm">
               <thead>
-                <tr className="text-left text-xs font-semibold text-slate-400 border-b border-slate-200">
+                <tr className="text-left text-xs font-semibold text-slate-400 border-b border-slate-200 whitespace-nowrap">
                   <th className="py-2 pr-3">ปีการศึกษา</th>
                   <th className="py-2 pr-3">กีฬา</th>
                   <th className="py-2 pr-3">ระดับเฉลี่ย</th>
@@ -239,10 +239,10 @@ export default function DashboardPage({ params }) {
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 mt-5">
           <h2 className="font-semibold text-slate-700 mb-1">คอร์สพิเศษ (AFTER SCHOOL / OCTOBER / SUMMER)</h2>
           <p className="text-xs text-slate-400 mb-3">แยกจากผลประเมินภาคปกติ ช่องที่ครูยังไม่ได้กรอกจะเว้นว่างไว้</p>
-          <div className="overflow-auto">
+          <div className="overflow-auto -mx-4 px-4 sm:mx-0 sm:px-0">
             <table className="min-w-full text-sm">
               <thead>
-                <tr className="text-left text-xs font-semibold text-slate-400 border-b border-slate-200">
+                <tr className="text-left text-xs font-semibold text-slate-400 border-b border-slate-200 whitespace-nowrap">
                   <th className="py-2 pr-3">ปีการศึกษา</th>
                   <th className="py-2 pr-3">ประเภทคอร์ส</th>
                   <th className="py-2 pr-3">รหัสวิชา</th>

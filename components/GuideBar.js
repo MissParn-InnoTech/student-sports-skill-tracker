@@ -23,7 +23,7 @@ export default function GuideBar() {
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         aria-controls="page-guide"
-        className="flex w-full items-center gap-2 px-4 py-2.5 text-left"
+        className="flex w-full items-center gap-2 px-4 py-3 sm:py-2.5 text-left"
       >
         <BookOpen className="h-4 w-4 shrink-0 text-brand" strokeWidth={2.25} />
         <span className="text-sm font-semibold text-ink">คู่มือการใช้งานหน้านี้</span>
@@ -31,7 +31,7 @@ export default function GuideBar() {
         <ChevronDown className={'ml-auto h-4 w-4 shrink-0 text-ink/50 transition-transform ' + (open ? 'rotate-180' : '')} />
       </button>
       {open && (
-        <div id="page-guide" className="px-4 pb-4 pl-10 text-sm leading-relaxed text-ink">
+        <div id="page-guide" className="px-4 pb-4 sm:pl-10 text-sm leading-relaxed text-ink">
           <p className="max-w-[70ch] text-ink/70">{guide.what}</p>
           {guide.steps?.length > 0 && (
             <>
