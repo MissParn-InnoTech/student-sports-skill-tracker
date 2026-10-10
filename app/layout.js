@@ -1,6 +1,7 @@
 import './globals.css';
 import { Mitr } from 'next/font/google';
 import Header from '@/components/Header';
+import GuideBar from '@/components/GuideBar';
 
 const mitr = Mitr({
   subsets: ['thai', 'latin'],
@@ -19,7 +20,10 @@ export default function RootLayout({ children }) {
     <html lang="th" className={mitr.variable}>
       <body className="bg-paper text-ink text-[15px] antialiased">
         <Header />
-        <main className="max-w-7xl mx-auto px-3 sm:px-6 py-5 pb-16">{children}</main>
+        <main className="max-w-7xl mx-auto px-3 sm:px-6 py-5 pb-16">
+          <GuideBar />
+          {children}
+        </main>
         {/* มาสคอต ACT ตกแต่งมุมล่างขวา — ไม่บังการใช้งาน (pointer-events-none) และ
             z-index ต่ำกว่าแถบ "บันทึกคะแนนทั้งหมด" (z-30 ใน app/page.js) ที่ fixed อยู่ด้านล่างเหมือนกัน */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
